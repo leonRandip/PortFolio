@@ -1,5 +1,6 @@
 import React from "react";
 import { Github, ExternalLink, Mail, Linkedin } from "lucide-react";
+import { Analytics } from "@vercel/analytics/react";
 
 export default function PortfolioClone() {
 
@@ -224,6 +225,7 @@ export default function PortfolioClone() {
         </p>
         <p className="mt-1">© Developed by Randip Leon</p>
       </footer>
+      <Analytics />
     </main>
   );
 }
