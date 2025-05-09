@@ -1,12 +1,14 @@
 import React from "react";
 import { Github, ExternalLink, Mail, Linkedin } from "lucide-react";
 import { Analytics } from "@vercel/analytics/react";
+import {Spotlight} from './components/Spotlight';
 
 export default function PortfolioClone() {
 
   return (
     <main className="relative min-h-screen bg-black text-white overflow-x-hidden font-sans">
       <section className="relative w-full h-screen overflow-hidden flex items-center justify-center px-6">
+        <Spotlight className="animate-spotlight absolute top-0 left-0 w-full h-full opacity-100" fill="white" />
         <div className="flex items-center max-w-7xl w-full z-10">
           {/* Left Side Social Icons */}
           <div className="flex flex-col items-center mr-8 z-10">
