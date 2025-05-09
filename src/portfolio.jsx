@@ -13,20 +13,24 @@ export default function PortfolioClone() {
             <div className="w-px h-16 bg-gradient-to-b from-white to-transparent"></div>
             <div className="flex flex-col items-center gap-4 mt-4">
               <a
-                href="https://github.com/placeholder"
+                href="https://github.com/leonRandip"
                 target="_blank"
                 rel="noopener noreferrer"
               >
                 <Github className="w-5 h-5 hover:scale-125 transition-transform" />
               </a>
               <a
-                href="https://linkedin.com/in/placeholder"
+                href="https://www.linkedin.com/in/leonrandip/"
                 target="_blank"
                 rel="noopener noreferrer"
               >
                 <Linkedin className="w-5 h-5 hover:scale-125 transition-transform" />
               </a>
-              <a href="mailto:placeholder@example.com">
+              <a
+                href="https://mail.google.com/mail/?view=cm&fs=1&to=leonrandip@gmail.com"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <Mail className="w-5 h-5 hover:scale-125 transition-transform" />
               </a>
             </div>
@@ -105,7 +109,7 @@ export default function PortfolioClone() {
       </section>
 
       {/* Projects */}
-      <section className="max-w-5xl mx-auto mt-24">
+      <section className="max-w-5xl mx-auto mt-24 px-4">
         <div className="">
           <h3 className="text-center text-2xl font-bold uppercase mb-6">
             Projects.
@@ -183,7 +187,7 @@ export default function PortfolioClone() {
       </section>
 
       {/* Skills */}
-      <section className="max-w-5xl mx-auto mt-24 pb-12">
+      <section className="max-w-5xl mx-auto mt-24 pb-12 px-4">
         <div className="">
           <h3 className="text-center text-2xl font-bold uppercase mb-1">
             What I Excel At.
