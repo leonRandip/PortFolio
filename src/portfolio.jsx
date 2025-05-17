@@ -15,13 +15,19 @@ export default function PortfolioClone() {
             <div className="w-px h-16 bg-gradient-to-b from-white to-transparent"></div>
             <div className="flex flex-col items-center gap-4 mt-4">
               <a href="https://github.com/leonRandip" target="_blank" rel="noopener noreferrer">
-                <Github className="w-5 h-5 hover:scale-125 transition-transform" />
+                <div className="p-2 rounded-full hover:bg-white hover:text-black transition-colors">
+                  <Github className="w-5 h-5" />
+                </div>
               </a>
               <a href="https://www.linkedin.com/in/leonrandip/" target="_blank" rel="noopener noreferrer">
-                <Linkedin className="w-5 h-5 hover:scale-125 transition-transform" />
+                <div className="p-2 rounded-full hover:bg-white hover:text-black transition-colors">
+                  <Linkedin className="w-5 h-5" />
+                </div>
               </a>
               <a href="https://mail.google.com/mail/?view=cm&fs=1&to=leonrandip@gmail.com" target="_blank" rel="noopener noreferrer">
-                <Mail className="w-5 h-5 hover:scale-125 transition-transform" />
+                <div className="p-2 rounded-full hover:bg-white hover:text-black transition-colors">
+                  <Mail className="w-5 h-5" />
+                </div>
               </a>
             </div>
             <div className="w-px h-40 bg-gradient-to-b from-white to-black mt-4"></div>
@@ -30,13 +36,19 @@ export default function PortfolioClone() {
           {/* Social Icons - Below hero content on mobile */}
           <div className="flex md:hidden justify-center mt-4 mb-6 space-x-6">
             <a href="https://github.com/leonRandip" target="_blank" rel="noopener noreferrer">
-              <Github className="w-5 h-5 hover:scale-125 transition-transform" />
+              <div className="p-2 rounded-full hover:bg-white hover:text-black transition-colors">
+                <Github className="w-5 h-5" />
+              </div>
             </a>
             <a href="https://www.linkedin.com/in/leonrandip/" target="_blank" rel="noopener noreferrer">
-              <Linkedin className="w-5 h-5 hover:scale-125 transition-transform" />
+              <div className="p-2 rounded-full hover:bg-white hover:text-black transition-colors">
+                <Linkedin className="w-5 h-5" />
+              </div>
             </a>
             <a href="https://mail.google.com/mail/?view=cm&fs=1&to=leonrandip@gmail.com" target="_blank" rel="noopener noreferrer">
-              <Mail className="w-5 h-5 hover:scale-125 transition-transform" />
+              <div className="p-2 rounded-full hover:bg-white hover:text-black transition-colors">
+                <Mail className="w-5 h-5" />
+              </div>
             </a>
           </div>
 
