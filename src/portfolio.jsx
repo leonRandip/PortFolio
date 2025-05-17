@@ -7,58 +7,45 @@ export default function PortfolioClone() {
   return (
     <main className="relative min-h-screen bg-black text-white overflow-x-hidden font-sans">
       <section className="relative w-full min-h-screen overflow-hidden flex items-center justify-center px-6">
-        <BackgroundBeams className="absolute inset-0 h-full w-full z-0" />
-        <div className="flex items-center max-w-7xl w-full z-10">
-          {/* Left Side Social Icons */}
-          <div className="flex flex-col items-center mr-8 z-10">
+        <BackgroundBeams className="absolute inset-0 z-0 w-full h-full scale-[2] md:scale-100" />
+        <div className="flex flex-col items-center justify-center w-full max-w-6xl md:flex-row gap-8 z-10">
+          {/* Social Icons - Right side for desktop */}
+          <div className="hidden md:flex flex-col items-center justify-center absolute right-80 top-1/2 -translate-y-1/2">
             <div className="w-4 h-4 bg-white rounded-full mb-2"></div>
             <div className="w-px h-16 bg-gradient-to-b from-white to-transparent"></div>
             <div className="flex flex-col items-center gap-4 mt-4">
-              <a
-                href="https://github.com/leonRandip"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <a href="https://github.com/leonRandip" target="_blank" rel="noopener noreferrer">
                 <Github className="w-5 h-5 hover:scale-125 transition-transform" />
               </a>
-              <a
-                href="https://www.linkedin.com/in/leonrandip/"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <a href="https://www.linkedin.com/in/leonrandip/" target="_blank" rel="noopener noreferrer">
                 <Linkedin className="w-5 h-5 hover:scale-125 transition-transform" />
               </a>
-              <a
-                href="https://mail.google.com/mail/?view=cm&fs=1&to=leonrandip@gmail.com"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <a href="https://mail.google.com/mail/?view=cm&fs=1&to=leonrandip@gmail.com" target="_blank" rel="noopener noreferrer">
                 <Mail className="w-5 h-5 hover:scale-125 transition-transform" />
               </a>
             </div>
             <div className="w-px h-40 bg-gradient-to-b from-white to-black mt-4"></div>
           </div>
-          {/* Right Side Text */}
-          <div className="flex flex-col z-10">
-            <h1 className="text-5xl font-bold mb-4">
-              Hello, I'm Maria Randip Leon
-            </h1>
-            <h2 className="text-3xl font-semibold text-gray-300 mb-6">
-              Full-Stack Web Developer
-            </h2>
+
+          {/* Social Icons - Below hero content on mobile */}
+          <div className="flex md:hidden justify-center mt-4 mb-6 space-x-6">
+            <a href="https://github.com/leonRandip" target="_blank" rel="noopener noreferrer">
+              <Github className="w-5 h-5 hover:scale-125 transition-transform" />
+            </a>
+            <a href="https://www.linkedin.com/in/leonrandip/" target="_blank" rel="noopener noreferrer">
+              <Linkedin className="w-5 h-5 hover:scale-125 transition-transform" />
+            </a>
+            <a href="https://mail.google.com/mail/?view=cm&fs=1&to=leonrandip@gmail.com" target="_blank" rel="noopener noreferrer">
+              <Mail className="w-5 h-5 hover:scale-125 transition-transform" />
+            </a>
+          </div>
+
+          {/* Hero Text Content */}
+          <div className="text-center md:text-left max-w-3xl">
+            <h1 className="text-5xl md:text-6xl font-bold mb-2">Hello, I'm Maria Randip Leon</h1>
+            <h2 className="text-2xl font-semibold text-gray-300 mb-4">Full-Stack Web Developer</h2>
             <p className="text-sm text-gray-400 leading-7">
-              • Build scalable full-stack applications using React, Node.js,
-              Express, and MongoDB
-              <br />
-              • Integrate real-time features and APIs with a focus on usability
-              and performance
-              <br />
-              • Solve backend challenges like authentication, data validation,
-              and cloud deployment
-              <br />
-              • Design clean, responsive UI with a keen eye for user experience
-              <br />• Always exploring the latest in tech trends and development
-              tools
+              • Build scalable full-stack applications using React, Node.js, Express, and MongoDB • Integrate real-time features and APIs with a focus on usability and performance • Solve backend challenges like authentication, data validation, and cloud deployment • Design clean, responsive UI with a keen eye for user experience • Always exploring the latest in tech trends and development tools
             </p>
           </div>
         </div>
@@ -222,7 +209,7 @@ export default function PortfolioClone() {
       {/* Footer */}
       <footer className="text-center text-xs text-gray-400 pb-6">
         <p>
-          Coded in Visual Studio Code. Built with React.JS and Tailwind CSS.
+          Coded in Visual Studio Code. Built with React.JS, Tailwind CSS and Aceternity UI.
         </p>
         <p className="mt-1">© Developed by Randip Leon</p>
       </footer>
