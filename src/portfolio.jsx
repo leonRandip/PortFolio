@@ -5,8 +5,8 @@ import { BackgroundBeams } from './components/BackgroundBeams';
 export default function PortfolioClone() {
 
   return (
-    <main className="relative min-h-screen bg-black text-white overflow-x-hidden font-sans">
-      <section className="relative w-full min-h-screen overflow-hidden flex items-center justify-center px-6">
+    <main className="relative bg-black text-white overflow-x-hidden font-sans scroll-smooth md:snap-y md:snap-mandatory md:h-screen md:overflow-y-scroll">
+      <section className="relative w-full min-h-screen md:h-screen overflow-hidden flex items-center justify-center px-6 snap-start">
         <BackgroundBeams className="absolute inset-0 z-0 w-full h-full scale-[2] md:scale-100" />
         <div className="flex flex-col items-center justify-center w-full max-w-6xl md:flex-row gap-8 z-10">
           {/* Social Icons - Right side for desktop */}
@@ -63,8 +63,8 @@ export default function PortfolioClone() {
         </div>
       </section>
 
-      {/* Work Experience */}
-      <section className="max-w-4xl mx-auto mt-24">
+      {/* Work Experience + Education */}
+      <section className="max-w-4xl mx-auto mt-24 md:mt-0 md:h-screen flex flex-col justify-center snap-start">
         <div className="border border-transparent hover:border-gray-700 hover:scale-105 transform transition-transform duration-300 p-4 rounded-md">
           <h3 className="text-center text-2xl font-bold uppercase mb-6">
             Work Experiences.
@@ -89,11 +89,7 @@ export default function PortfolioClone() {
             </div>
           </div>
         </div>
-      </section>
-
-      {/* Education */}
-      <section className="max-w-4xl mx-auto mt-24">
-        <div className=" border border-transparent hover:border-gray-700 hover:scale-105 transform transition-transform duration-300 p-4 rounded-md">
+        <div className=" border border-transparent hover:border-gray-700 hover:scale-105 transform transition-transform duration-300 p-4 rounded-md mt-12">
           <h3 className="text-center text-2xl font-bold uppercase mb-6 ">
             Educations.
           </h3>
@@ -110,7 +106,7 @@ export default function PortfolioClone() {
       </section>
 
       {/* Projects */}
-      <section className="max-w-5xl mx-auto mt-24 px-4">
+      <section className="max-w-5xl mx-auto mt-24 md:mt-0 md:h-screen px-4 flex flex-col justify-center snap-start">
         <div className="">
           <h3 className="text-center text-2xl font-bold uppercase mb-6">
             Projects.
@@ -188,8 +184,8 @@ export default function PortfolioClone() {
       </section>
 
       {/* Skills */}
-      <section className="max-w-5xl mx-auto mt-24 pb-12 px-4">
-        <div className="">
+      <section className="max-w-5xl mx-auto mt-24 md:mt-0 md:h-screen pb-12 px-4 flex flex-col snap-start">
+        <div className="flex-grow flex flex-col justify-center">
           <h3 className="text-center text-2xl font-bold uppercase mb-1">
             What I Excel At.
           </h3>
@@ -216,15 +212,14 @@ export default function PortfolioClone() {
             ))}
           </div>
         </div>
+        <footer className="text-center text-xs text-gray-400 pb-6 mt-auto">
+          <p>
+            Coded in Visual Studio Code. Built with React.JS, Tailwind CSS and Aceternity UI.
+          </p>
+          <p className="mt-1">© Developed by Randip Leon</p>
+        </footer>
       </section>
 
-      {/* Footer */}
-      <footer className="text-center text-xs text-gray-400 pb-6">
-        <p>
-          Coded in Visual Studio Code. Built with React.JS, Tailwind CSS and Aceternity UI.
-        </p>
-        <p className="mt-1">© Developed by Randip Leon</p>
-      </footer>
       <Analytics />
     </main>
   );
