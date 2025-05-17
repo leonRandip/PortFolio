@@ -212,7 +212,7 @@ export default function PortfolioClone() {
             ))}
           </div>
         </div>
-        <footer className="text-center text-xs text-gray-400 pb-6 mt-auto">
+        <footer className="text-center text-xs text-gray-400 pb-6 mt-12 md:mt-auto">
           <p>
             Coded in Visual Studio Code. Built with React.JS, Tailwind CSS and Aceternity UI.
           </p>
