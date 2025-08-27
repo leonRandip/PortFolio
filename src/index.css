@@ -3,4 +3,17 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Hide scrollbar across all browsers */
+::-webkit-scrollbar {
+  display: none;
+}
 
+/* Firefox */
+* {
+  scrollbar-width: none;
+}
+
+/* IE/Edge */
+* {
+  -ms-overflow-style: none;
+}
