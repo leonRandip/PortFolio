@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { Github, ExternalLink, Mail, Linkedin } from "lucide-react";
 import { Analytics } from "@vercel/analytics/react";
 import { BackgroundBeams } from "./components/BackgroundBeams";
+import VideoScrub from "./components/VideoScrub";
+import { MyWorld, TechMusic, Mma, CryptoChess, InterestsGrid } from "./components/InterestPages";
 
 export default function PortfolioClone() {
   const [isScrolling, setIsScrolling] = useState(false);
@@ -15,9 +17,10 @@ export default function PortfolioClone() {
     clearTimeout(window.scrollTimeout);
     window.scrollTimeout = setTimeout(() => setIsScrolling(false), 1500);
 
-    // Check which section is currently in viewport (only mobile-visible sections)
-    const mobileSections = document.querySelectorAll(
-      "section:not(.hidden.md\\:flex)"
+    // Check which section is currently in viewport (only visible sections)
+    const sections = document.querySelectorAll("section");
+    const mobileSections = Array.from(sections).filter(
+      (section) => window.getComputedStyle(section).display !== "none"
     );
     const viewportHeight = window.innerHeight;
     const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
@@ -39,6 +42,7 @@ export default function PortfolioClone() {
 
   return (
     <main
+      id="main-container"
       className="relative bg-black text-white overflow-x-hidden font-sans scroll-smooth md:snap-y md:snap-mandatory md:h-screen md:overflow-y-scroll snap-y snap-mandatory h-screen overflow-y-scroll"
       onScroll={handleScroll}
     >
@@ -46,7 +50,7 @@ export default function PortfolioClone() {
       <div className="fixed top-1/2 right-2 z-50 md:hidden transform -translate-y-1/2">
         {isScrolling && (
           <div className="flex flex-col gap-2">
-            {[1, 2, 3, 4, 5].map((pageNum) => (
+            {[1, 2, 3, 4, 5, 6].map((pageNum) => (
               <div
                 key={pageNum}
                 className={`transition-all duration-300 ease-in-out ${
@@ -397,7 +401,7 @@ export default function PortfolioClone() {
         </div>
       </section>
 
-      {/* Page 5: Skills + Footer */}
+      {/* Page 5: Skills */}
       <section
         data-page-index="5"
         className="w-full min-h-screen md:h-screen flex flex-col justify-center px-6 snap-start"
@@ -410,16 +414,18 @@ export default function PortfolioClone() {
             <h3 className="text-center text-2xl font-bold uppercase mb-6">
               Skills.
             </h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
               {[
                 "EXPRESSJS",
                 "MONGODB",
                 "SQL",
-                "HTML",
-                "CSS",
+                "HTML5",
+                "CSS3",
                 "JAVASCRIPT",
-                "REACT",
+                "REACTJS",
                 "NODEJS",
+                "POSTGRESQL",
+                "REDUX",
               ].map((skill) => (
                 <div
                   key={skill}
@@ -430,15 +436,35 @@ export default function PortfolioClone() {
               ))}
             </div>
           </div>
-          <footer className="text-center text-xs text-gray-400 pb-6 mt-12 md:mt-auto">
-            <p>
-              Coded in Visual Studio Code. Built with React.JS, Tailwind CSS and
-              Aceternity UI.
-            </p>
-            <p className="mt-1">© Developed by Randip Leon</p>
-          </footer>
+
         </div>
       </section>
+
+      {/* Page 6: My World */}
+      <MyWorld />
+
+      {/* Page 7: Tech Trends / Music */}
+      <TechMusic />
+
+      {/* Page 8: MMA */}
+      <Mma />
+
+      {/* Page 9: Video Scrub */}
+      <VideoScrub />
+
+      {/* Page 10: Crypto / Chess */}
+      <CryptoChess />
+
+      {/* Page 11: Interests Grid */}
+      <InterestsGrid />
+
+      <footer className="w-full text-center text-xs text-gray-400 py-8 snap-start bg-black">
+        <p>
+          Coded in Visual Studio Code. Built with React.JS, Tailwind CSS and
+          Aceternity UI.
+        </p>
+        <p className="mt-1">© Developed by Randip Leon</p>
+      </footer>
 
       <Analytics />
     </main>
