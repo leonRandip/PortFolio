@@ -17,7 +17,7 @@ export function parseCommand(input, registry) {
 
   // Try progressively shorter prefix matches
   const parts = trimmed.split(/\s+/);
-  for (let i = parts.length; i > 1; i--) {
+  for (let i = parts.length; i >= 1; i--) {
     const candidate = parts.slice(0, i).join(' ');
     if (registry[candidate]) {
       return { command: candidate, args: parts.slice(i) };

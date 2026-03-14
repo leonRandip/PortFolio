@@ -7,6 +7,38 @@
 // To add a new command: add one entry here. That's it.
 // ─────────────────────────────────────────────────────────────────────────────
 
+// ── Project URLs ─────────────────────────────────────────────────────────────
+
+const OPEN_PROJECTS = {
+  'quiz':        'https://leonrandip.github.io/Quiz-Site/',
+  'quiz-app':    'https://leonrandip.github.io/Quiz-Site/',
+  'chatbot':     'https://personalised-chatbot.vercel.app',
+  'ded-lift':    'https://ded-lift.vercel.app/',
+  'soulstitch':  'https://soul-stitch.vercel.app/',
+  'scrollr3f':   'https://scroll-r3f.vercel.app',
+  'parkinsons':  'https://parkinsonsdetection.up.railway.app/',
+};
+
+// ── Fortune quotes ────────────────────────────────────────────────────────────
+
+const FORTUNES = [
+  '"First, solve the problem. Then, write the code." — John Johnson',
+  '"Any fool can write code that a computer can understand. Good programmers write code that humans can understand." — Martin Fowler',
+  '"It works on my machine." — Every Developer, always',
+  '"Delete dead code before it deletes you." — unknown',
+  '"console.log is a perfectly valid debugging strategy." — Randip, probably',
+  '"Programming is the art of telling another human what one wants the computer to do." — Donald Knuth',
+  '"The best code is no code at all." — Jeff Atwood',
+  '"Make it work, make it right, make it fast." — Kent Beck',
+  '"Talk is cheap. Show me the code." — Linus Torvalds',
+  '"Software is never finished, only abandoned." — unknown',
+  '"Before software can be reusable it first has to be usable." — Ralph Johnson',
+  '"Simplicity is the soul of efficiency." — Austin Freeman',
+  '"It\'s not a bug — it\'s an undocumented feature." — anonymous',
+  '"The most disastrous thing that you can ever learn is your first programming language." — Alan Kay',
+  '"Weeks of coding can save you hours of planning." — unknown',
+];
+
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 function randomHex() {
@@ -115,6 +147,17 @@ export const commands = {
       '  │  hack                       Initiate a breach sequence         │',
       '  │  fullscreen                 Toggle fullscreen mode             │',
       '  │  matrix                     Enter the Matrix                   │',
+      '  │  timeline                   Career & education timeline        │',
+      '  │  open <project>             Open a project in browser          │',
+      '  │  contact                    Get in touch                       │',
+      '  │  neofetch                   System info                        │',
+      '  │  cowsay <text>              Make the cow speak                 │',
+      '  │  fortune                    Random dev wisdom                  │',
+      '  │  man randip                 Read the manual                    │',
+      '  │  npm install randip         Install the developer              │',
+      '  │  curl api.randip.dev/me     Fetch JSON profile                 │',
+      '  │  top                        Process monitor                    │',
+      '  │  brickbreaker               Play brick breaker                 │',
       '  │  ssh guest@legacy           Connect to legacy portfolio        │',
       '  │  clear                      Clear terminal                     │',
       '  │  help                       Show this message                  │',
@@ -393,6 +436,239 @@ export const commands = {
       [1100, () => addOutput('', 'system')],
     ]);
     setTimeout(() => onHack?.(), 1200);
+  },
+
+  // ── timeline ──────────────────────────────────────────────────────────────────
+  timeline: ({ addOutput }) => {
+    const lines = [
+      [0,    ['', 'system']],
+      [60,   ['  ──── CAREER / EDUCATION TIMELINE ────', 'success']],
+      [120,  ['', 'system']],
+      [200,  ['  2021  ┬  Started B.Tech IT @ Karpagam College of Engineering', 'warning']],
+      [380,  ['        │', 'system']],
+      [560,  ['  2022  ┤  Built Quiz App · Personalised Chatbot', 'warning']],
+      [740,  ['        │', 'system']],
+      [920,  ['  2023  ┤  Internship @ Prime Solutions — MERN Task Manager', 'warning']],
+      [1100, ['        │  Built: Ded-Lift · SoulStitch · ScrollR3F', 'system']],
+      [1280, ['        │', 'system']],
+      [1460, ['  2024  ┤  Parkinsons Detection (Python + Flask)', 'warning']],
+      [1640, ['        │  Frontend Dev Intern @ yavar.ai  ◀ current', 'system']],
+      [1820, ['        │', 'system']],
+      [2000, ['  2025  └  B.Tech IT graduation (expected)', 'warning']],
+      [2180, ['', 'system']],
+    ];
+    lines.forEach(([delay, [text, type]]) => setTimeout(() => addOutput(text, type), delay));
+  },
+
+  // ── open ──────────────────────────────────────────────────────────────────────
+  open: ({ args, addOutput, addLink }) => {
+    if (!args || !args[0]) {
+      addOutput('', 'system');
+      addOutput('Usage: open <project-name>', 'system');
+      addOutput('Available: ' + Object.keys(OPEN_PROJECTS).join(', '), 'warning');
+      addOutput('', 'system');
+      return;
+    }
+    const arg = args.join(' ').toLowerCase().trim();
+    const key = Object.keys(OPEN_PROJECTS).find(k => k.includes(arg) || arg.includes(k));
+    if (!key) {
+      addOutput('', 'system');
+      addOutput(`[ERR] Unknown project: "${arg}"`, 'error');
+      addOutput('Available: ' + Object.keys(OPEN_PROJECTS).join(', '), 'warning');
+      addOutput('', 'system');
+      return;
+    }
+    const url = OPEN_PROJECTS[key];
+    window.open(url, '_blank');
+    stagger([
+      [0,   () => addOutput('', 'system')],
+      [60,  () => addOutput(`[SYS] Opening ${key}...`, 'system')],
+      [200, () => addOutput(`[OK]  Launched in new tab.`, 'success')],
+      [280, () => addLink(`  → ${url}`, url)],
+      [360, () => addOutput('', 'system')],
+    ]);
+  },
+
+  // ── contact ───────────────────────────────────────────────────────────────────
+  contact: ({ addOutput, addLink }) => {
+    stagger([
+      [0,   () => addOutput('', 'system')],
+      [60,  () => addOutput('  ┌──────────────────────────────────────────────┐', 'success')],
+      [120, () => addOutput('  │  CONTACT — Maria Randip Leon                │', 'success')],
+      [180, () => addOutput('  │                                              │', 'success')],
+      [240, () => addLink(  '  │  ✉   leonrandip@gmail.com                  │', 'mailto:leonrandip@gmail.com')],
+      [300, () => addLink(  '  │  in  linkedin.com/in/leonrandip             │', 'https://linkedin.com/in/leonrandip')],
+      [360, () => addLink(  '  │  gh  github.com/leonRandip                 │', 'https://github.com/leonRandip')],
+      [420, () => addOutput('  │                                              │', 'success')],
+      [480, () => addOutput('  │  Response time: usually within 24h          │', 'success')],
+      [540, () => addOutput('  └──────────────────────────────────────────────┘', 'success')],
+      [600, () => addOutput('', 'system')],
+    ]);
+  },
+
+  // ── neofetch ──────────────────────────────────────────────────────────────────
+  neofetch: ({ addOutput }) => {
+    const lines = [
+      ['', 'system'],
+      ['         .          visitor@randip', 'success'],
+      ['        /X\\         ──────────────', 'success'],
+      ['       /XXX\\        OS:       Arch btw', 'success'],
+      ['      / XXX \\       Host:     randip-portfolio v2.0.0', 'success'],
+      ['     /  XXX  \\      Shell:    zsh 5.9', 'success'],
+      ['    /___XXX___\\     WM:       yavar.ai', 'success'],
+      ['                    Uptime:   since 2021', 'success'],
+      ['                    Packages: 1337 (npm)', 'success'],
+      ['                    CPU:      Ryzen 5 3600 @ 3.60GHz', 'success'],
+      ['                    Memory:   8192MiB / 16384MiB', 'success'],
+      ['                    Theme:    Terminal Green', 'success'],
+      ['', 'system'],
+    ];
+    lines.forEach(([text, type], i) => setTimeout(() => addOutput(text, type), i * 60));
+  },
+
+  // ── cowsay ────────────────────────────────────────────────────────────────────
+  cowsay: ({ args, addOutput }) => {
+    const text = args && args.length ? args.join(' ') : 'moo';
+    const len = text.length;
+    const top    = ' ' + '_'.repeat(len + 2);
+    const middle = `< ${text} >`;
+    const bottom = ' ' + '-'.repeat(len + 2);
+    const lines = [
+      '',
+      top,
+      middle,
+      bottom,
+      '        \\   ^__^',
+      '         \\  (oo)\\_______',
+      '            (__)\\       )\\/\\',
+      '                ||----w |',
+      '                ||     ||',
+      '',
+    ];
+    lines.forEach((l, i) => setTimeout(() => addOutput(l, 'system'), i * 40));
+  },
+
+  // ── fortune ───────────────────────────────────────────────────────────────────
+  fortune: ({ addOutput }) => {
+    const quote = FORTUNES[Math.floor(Math.random() * FORTUNES.length)];
+    addOutput('', 'system');
+    addOutput('  » ' + quote, 'success');
+    addOutput('', 'system');
+  },
+
+  // ── man ───────────────────────────────────────────────────────────────────────
+  man: ({ args, addOutput }) => {
+    if (!args || !args[0] || args[0] !== 'randip') {
+      addOutput('', 'system');
+      addOutput('Usage: man randip', 'system');
+      addOutput('', 'system');
+      return;
+    }
+    // fall through to 'man randip' key
+    addOutput('[ERR] use: man randip', 'error');
+  },
+
+  // ── man randip ────────────────────────────────────────────────────────────────
+  'man randip': ({ addOutput }) => {
+    const lines = [
+      '',
+      'RANDIP(1)              User Commands              RANDIP(1)',
+      '',
+      'NAME',
+      '       randip - Full-Stack Developer & Frontend Intern',
+      '',
+      'SYNOPSIS',
+      '       randip [--coffee] [--react] [--debug] [project]',
+      '',
+      'DESCRIPTION',
+      '       Maria Randip Leon is a full-stack web developer currently',
+      '       serving as a Frontend Dev Intern at yavar.ai. Specialises',
+      '       in React, Node.js, Express, MongoDB, and PostgreSQL.',
+      '',
+      'OPTIONS',
+      '       --coffee        Increases productivity by 200%',
+      '       --react         Renders everything as a component',
+      '       --mern          Deploys to prod at 2am',
+      '       --overthink     Default flag. Cannot be disabled.',
+      '',
+      'BUGS',
+      '       Occasionally over-engineers simple solutions.',
+      '       See also: top(1) — check overthinking.exe CPU usage.',
+      '',
+      'SEE ALSO',
+      '       whoami(1), finger(1), curl(1), fortune(1)',
+      '',
+      'RANDIP(1)               2025               RANDIP(1)',
+      '',
+    ];
+    lines.forEach((l, i) => setTimeout(() => addOutput(l, 'system'), i * 40));
+  },
+
+  // ── npm install randip ────────────────────────────────────────────────────────
+  'npm install randip': ({ addOutput }) => {
+    stagger([
+      [0,    () => addOutput('', 'system')],
+      [80,   () => addOutput('npm warn deprecated node_feelings@∞: please stop', 'warning')],
+      [400,  () => addOutput('npm notice ⠙ resolving dependencies...', 'system')],
+      [900,  () => addOutput('npm notice ⠹ fetching packages...', 'system')],
+      [1400, () => addOutput('npm notice ⠸ linking binaries...', 'system')],
+      [1900, () => addOutput('added 9 packages in 4.2s', 'system')],
+      [2100, () => addOutput('', 'system')],
+      [2200, () => addOutput('randip@2.0.0', 'success')],
+      [2300, () => addOutput('  ├── react@19.0.0', 'success')],
+      [2400, () => addOutput('  ├── nodejs@22.0.0', 'success')],
+      [2500, () => addOutput('  ├── express@5.0.0', 'success')],
+      [2600, () => addOutput('  ├── mongodb@8.0.0', 'success')],
+      [2700, () => addOutput('  ├── postgresql@16.0.0', 'success')],
+      [2800, () => addOutput('  ├── css3@∞', 'success')],
+      [2900, () => addOutput('  ├── zsh@5.9', 'success')],
+      [3000, () => addOutput('  └── overthinking (optional peer dep, auto-installed)', 'success')],
+      [3200, () => addOutput('', 'system')],
+      [3300, () => addOutput('✓ randip installed successfully', 'success')],
+      [3400, () => addOutput('', 'system')],
+    ]);
+  },
+
+  // ── curl api.randip.dev/me ────────────────────────────────────────────────────
+  'curl api.randip.dev/me': ({ addOutput }) => {
+    const lines = [
+      '',
+      '{',
+      '  "name": "Maria Randip Leon",',
+      '  "alias": "randip",',
+      '  "role": "Frontend Dev Intern @ yavar.ai",',
+      '  "stack": ["React", "Node.js", "Express", "MongoDB", "PostgreSQL"],',
+      '  "education": "B.Tech IT — Karpagam College of Engineering (2021–2025)",',
+      '  "internships": ["Prime Solutions (2023)", "yavar.ai (current)"],',
+      '  "projects": 6,',
+      '  "github": "github.com/leonRandip",',
+      '  "email": "leonrandip@gmail.com",',
+      '  "status": "employed",',
+      '  "open_to_work": false,',
+      '  "coffee_dependency": true,',
+      '  "goals": ["Tech Lead", "Entrepreneur", "Open a cafe", "Open a gym"]',
+      '}',
+      '',
+    ];
+    lines.forEach((l, i) => setTimeout(() => addOutput(l, 'success'), i * 40));
+  },
+
+  // ── top ───────────────────────────────────────────────────────────────────────
+  top: ({ addOutput, onTop }) => {
+    stagger([
+      [0,   () => addOutput('', 'system')],
+      [80,  () => addOutput('[SYS] Launching process monitor...', 'system')],
+      [200, () => onTop?.()],
+    ]);
+  },
+
+  // ── brickbreaker ──────────────────────────────────────────────────────────────
+  brickbreaker: ({ addOutput, onBrickBreaker }) => {
+    stagger([
+      [0,   () => addOutput('', 'system')],
+      [80,  () => addOutput('[SYS] Loading Brick Breaker...', 'success')],
+      [200, () => onBrickBreaker?.()],
+    ]);
   },
 
   // ── grep -r ───────────────────────────────────────────────────────────────────

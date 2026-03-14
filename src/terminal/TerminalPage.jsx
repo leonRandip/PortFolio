@@ -5,6 +5,8 @@ import { commands } from './commands';
 import MatrixCanvas from '../components/MatrixCanvas';
 import BashrcPopup from '../components/BashrcPopup';
 import HackSequence from '../components/HackSequence';
+import TopProcess from '../components/TopProcess';
+import BrickBreaker from '../components/BrickBreaker';
 
 const BOOT_SEQUENCE = [
   { text: '[BIOS] Initializing hardware...', delay: 0 },
@@ -40,6 +42,8 @@ export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
   const [isMatrixActive, setIsMatrixActive] = useState(false);
   const [isBashrcActive, setIsBashrcActive] = useState(false);
   const [isHackActive, setIsHackActive] = useState(false);
+  const [isTopActive, setIsTopActive] = useState(false);
+  const [isBrickBreakerActive, setIsBrickBreakerActive] = useState(false);
   const [cmdHistory, setCmdHistory] = useState([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
 
@@ -145,6 +149,8 @@ export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
           onMatrix: () => setIsMatrixActive(true),
           onBashrc: () => setIsBashrcActive(true),
           onHack: () => setIsHackActive(true),
+          onTop: () => setIsTopActive(true),
+          onBrickBreaker: () => setIsBrickBreakerActive(true),
           onLegacy,
         });
       } else {
@@ -161,7 +167,7 @@ export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
 
   // ── Keyboard handling ──────────────────────────────────────────────────────
   const handleKeyDown = useCallback((e) => {
-    if (isBooting || isHackActive) {
+    if (isBooting || isHackActive || isTopActive || isBrickBreakerActive) {
       if (e.key === 'Enter' && isBooting) skipBoot_();
       return;
     }
@@ -202,7 +208,7 @@ export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
     } else {
       syncCursor();
     }
-  }, [isBooting, isHackActive, historyIndex, cmdHistory, handleSubmit, skipBoot_, syncCursor, suggestion, cursorPos, inputValue.length]);
+  }, [isBooting, isHackActive, isTopActive, isBrickBreakerActive, historyIndex, cmdHistory, handleSubmit, skipBoot_, syncCursor, suggestion, cursorPos, inputValue.length]);
 
   return (
     <div
@@ -309,6 +315,23 @@ export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
             addLine(msg, 'success');
           }}
         />
+      )}
+
+      {/* Top process monitor */}
+      {isTopActive && (
+        <TopProcess onClose={() => {
+          setIsTopActive(false);
+          addLine('', 'system');
+          addLine('top: exited.', 'system');
+        }} />
+      )}
+
+      {/* Brick Breaker game */}
+      {isBrickBreakerActive && (
+        <BrickBreaker onClose={(msg) => {
+          setIsBrickBreakerActive(false);
+          addLine(msg, 'success');
+        }} />
       )}
 
       {/* Boot skip hint */}
