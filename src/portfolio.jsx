@@ -4,8 +4,9 @@ import { Analytics } from "@vercel/analytics/react";
 import { BackgroundBeams } from "./components/BackgroundBeams";
 import VideoScrub from "./components/VideoScrub";
 import { MyWorld, TechMusic, Mma, CryptoChess, InterestsGrid } from "./components/InterestPages";
+import EjectFooter from "./components/EjectFooter";
 
-export default function PortfolioClone() {
+export default function PortfolioClone({ onEject, isMobile }) {
   const [isScrolling, setIsScrolling] = useState(false);
   const [activePage, setActivePage] = useState(1);
 
@@ -465,6 +466,8 @@ export default function PortfolioClone() {
         </p>
         <p className="mt-1">© Developed by Randip Leon</p>
       </footer>
+
+      {isMobile && onEject && <EjectFooter onEject={onEject} />}
 
       <Analytics />
     </main>
