@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import './terminal.css';
 import { parseCommand } from './parseCommand';
 import { commands } from './commands';
+import MatrixCanvas from '../components/MatrixCanvas';
 
 const BOOT_SEQUENCE = [
   { text: '[BIOS] Initializing hardware...', delay: 0 },
@@ -25,10 +26,11 @@ const REINIT_SEQUENCE = [
 let lineIdCounter = 0;
 const makeId = () => ++lineIdCounter;
 
-export default function TerminalPage({ onLaunch, skipBoot }) {
+export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
   const [outputLines, setOutputLines] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [isBooting, setIsBooting] = useState(true);
+  const [isMatrixActive, setIsMatrixActive] = useState(false);
   const [cmdHistory, setCmdHistory] = useState([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
 
@@ -98,11 +100,18 @@ export default function TerminalPage({ onLaunch, skipBoot }) {
       setCmdHistory(prev => [raw, ...prev]);
       setHistoryIndex(-1);
 
-      const { command } = parseCommand(raw, commands);
+      const { command, args } = parseCommand(raw, commands);
       const handler = commands[command];
 
       if (handler) {
-        handler({ args: [], addOutput: addLine, clearOutput, onLaunch });
+        handler({
+          args,
+          addOutput: addLine,
+          clearOutput,
+          onLaunch,
+          onMatrix: () => setIsMatrixActive(true),
+          onLegacy,
+        });
       } else {
         addLine(`command not found: ${raw}`, 'error');
         addLine("Type 'help' for available commands.", 'system');
@@ -111,7 +120,7 @@ export default function TerminalPage({ onLaunch, skipBoot }) {
 
     setInputValue('');
     setHistoryIndex(-1);
-  }, [inputValue, addLine, clearOutput, onLaunch]);
+  }, [inputValue, addLine, clearOutput, onLaunch, onLegacy]);
 
   // ── Keyboard handling ──────────────────────────────────────────────────────
   const handleKeyDown = useCallback((e) => {
@@ -177,6 +186,17 @@ export default function TerminalPage({ onLaunch, skipBoot }) {
             aria-label="Terminal input"
           />
         </div>
+      )}
+
+      {/* Matrix overlay */}
+      {isMatrixActive && (
+        <MatrixCanvas
+          onExit={() => {
+            setIsMatrixActive(false);
+            addLine('', 'system');
+            addLine('Matrix exited.', 'system');
+          }}
+        />
       )}
 
       {/* Boot skip hint */}

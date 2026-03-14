@@ -7,11 +7,13 @@ export default function EjectFooter({ onEject }) {
   const [isDragging, setIsDragging] = useState(false);
   const startYRef = useRef(0);
   const triggeredRef = useRef(false);
+  const lastHapticMilestoneRef = useRef(0);
 
   const handleTouchStart = (e) => {
     startYRef.current = e.touches[0].clientY;
     setIsDragging(true);
     triggeredRef.current = false;
+    lastHapticMilestoneRef.current = 0;
   };
 
   const handleTouchMove = (e) => {
@@ -21,9 +23,20 @@ export default function EjectFooter({ onEject }) {
     if (delta > 0) {
       const clamped = Math.min(delta, THRESHOLD + 50);
       setDragY(clamped);
+
+      // Progressive haptic: pulse every 30px tier below threshold
+      if (delta < THRESHOLD && navigator.vibrate) {
+        const milestone = Math.floor(delta / 30) * 30;
+        if (milestone > lastHapticMilestoneRef.current) {
+          lastHapticMilestoneRef.current = milestone;
+          navigator.vibrate(8);
+        }
+      }
+
+      // Threshold reached: stronger double-pulse
       if (delta >= THRESHOLD && !triggeredRef.current) {
         triggeredRef.current = true;
-        if (navigator.vibrate) navigator.vibrate(50);
+        if (navigator.vibrate) navigator.vibrate([60, 30, 60]);
       }
     }
   };
