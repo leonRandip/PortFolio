@@ -38,15 +38,26 @@ export default function RetroPortfolio({ onExit }) {
     return () => document.getElementById('retro-styles')?.remove();
   }, []);
 
-  // Animate hit counter 0 → 1337
+  // Animate hit counter to real visitor count (or 1337 fallback)
   useEffect(() => {
-    let val = 0;
-    const interval = setInterval(() => {
-      val = Math.min(val + 31, 1337);
-      setCounter(val);
-      if (val >= 1337) clearInterval(interval);
-    }, 28);
-    return () => clearInterval(interval);
+    const animateTo = (target) => {
+      let val = 0;
+      const step = Math.max(1, Math.floor(target / 44));
+      const interval = setInterval(() => {
+        val = Math.min(val + step, target);
+        setCounter(val);
+        if (val >= target) clearInterval(interval);
+      }, 28);
+      return () => clearInterval(interval);
+    };
+
+    let cleanup;
+    fetch('https://api.countapi.xyz/hit/randipleon.vercel.app/visits')
+      .then(r => r.json())
+      .then(data => { cleanup = animateTo(data.value || 1337); })
+      .catch(() => { cleanup = animateTo(1337); });
+
+    return () => cleanup?.();
   }, []);
 
   const base = {
@@ -168,7 +179,7 @@ export default function RetroPortfolio({ onExit }) {
           <div style={box()}>
             <p style={{ marginTop: 0 }}>
               &gt; <strong>NAME:</strong> Maria Randip Leon<br />
-              &gt; <strong>ROLE:</strong> Frontend Developer Intern @ <span style={{ color: '#66ffaa' }}>yavar.ai</span><br />
+              &gt; <strong>ROLE:</strong> Frontend Developer Intern @ <span style={{ color: '#66ffaa' }}>yavar.ai</span> <span style={{ color: '#888' }}>[ACTIVE]</span><br />
               &gt; <strong>ALSO:</strong> Full-Stack Web Developer<br />
               &gt; <strong>STACK:</strong> React · Node.js · Express · MongoDB · PostgreSQL<br />
               &gt; <strong>COLLEGE:</strong> Karpagam College of Engineering (B.Tech IT, 2021–2025)<br />
@@ -238,7 +249,7 @@ export default function RetroPortfolio({ onExit }) {
           <div style={box()}>
             <p>&gt; <strong>EMAIL</strong></p>
             <p style={{ marginLeft: '1rem' }}>
-              <a href="mailto:leonrandip@gmail.com" style={{ color: '#00ffff' }}>
+              <a href="mailto:leonrandip@gmail.com" target="_blank" rel="noopener noreferrer" style={{ color: '#00ffff' }}>
                 leonrandip@gmail.com
               </a>
             </p>
@@ -276,7 +287,7 @@ export default function RetroPortfolio({ onExit }) {
           className="retro-marquee-inner"
           style={{ color: '#00aa33', fontSize: '0.7rem', letterSpacing: '0.12em' }}
         >
-          {'*** AVAILABLE FOR HIRE *** FRONTEND DEV INTERN @ YAVAR.AI *** OPEN TO FULL-TIME OPPORTUNITIES *** REACT · NODE.JS · EXPRESS · MONGODB *** BUILD · SHIP · REPEAT ***'}
+          {'*** CURRENTLY @ YAVAR.AI — FRONTEND DEV INTERN *** REACT · NODE.JS · EXPRESS · MONGODB *** OPEN AFTER INTERNSHIP CONCLUDES *** BUILD · SHIP · REPEAT ***'}
         </span>
       </div>
     </div>

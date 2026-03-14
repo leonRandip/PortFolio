@@ -1,8 +1,10 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import './terminal.css';
 import { parseCommand } from './parseCommand';
 import { commands } from './commands';
 import MatrixCanvas from '../components/MatrixCanvas';
+import BashrcPopup from '../components/BashrcPopup';
+import HackSequence from '../components/HackSequence';
 
 const BOOT_SEQUENCE = [
   { text: '[BIOS] Initializing hardware...', delay: 0 },
@@ -23,14 +25,21 @@ const REINIT_SEQUENCE = [
   { text: '', delay: 440 },
 ];
 
+// Module-level: computed once, not per render
+const COMMAND_KEYS = Object.keys(commands);
+
 let lineIdCounter = 0;
 const makeId = () => ++lineIdCounter;
 
 export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
   const [outputLines, setOutputLines] = useState([]);
   const [inputValue, setInputValue] = useState('');
+  const [cursorPos, setCursorPos] = useState(0);
+  const [selectionEnd, setSelectionEnd] = useState(0);
   const [isBooting, setIsBooting] = useState(true);
   const [isMatrixActive, setIsMatrixActive] = useState(false);
+  const [isBashrcActive, setIsBashrcActive] = useState(false);
+  const [isHackActive, setIsHackActive] = useState(false);
   const [cmdHistory, setCmdHistory] = useState([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
 
@@ -39,13 +48,37 @@ export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
   const skipRef = useRef(false);
   const bootDoneRef = useRef(false);
 
+  // Read cursor + selection from the hidden input (after browser processes the event)
+  const syncCursor = useCallback(() => {
+    setTimeout(() => {
+      const el = inputRef.current;
+      if (!el) return;
+      setCursorPos(el.selectionStart ?? 0);
+      setSelectionEnd(el.selectionEnd ?? 0);
+    }, 0);
+  }, []);
+
   const addLine = useCallback((text, type = 'system') => {
     setOutputLines(prev => [...prev, { text, type, id: makeId() }]);
+  }, []);
+
+  const addLink = useCallback((text, href, download) => {
+    setOutputLines(prev => [...prev, { text, type: 'link', href, download, id: makeId() }]);
   }, []);
 
   const clearOutput = useCallback(() => {
     setOutputLines([]);
   }, []);
+
+  // ── Autocomplete suggestion (derived, no extra state) ───────────────────────
+  const suggestion = useMemo(() => {
+    if (!inputValue || cursorPos !== inputValue.length) return '';
+    const lower = inputValue.toLowerCase();
+    const matches = COMMAND_KEYS.filter(k => k.startsWith(lower) && k !== lower);
+    if (!matches.length) return '';
+    matches.sort((a, b) => a.length - b.length);
+    return matches[0];
+  }, [inputValue, cursorPos]);
 
   // ── Boot sequence ──────────────────────────────────────────────────────────
   useEffect(() => {
@@ -93,7 +126,6 @@ export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
   const handleSubmit = useCallback(() => {
     const raw = inputValue.trim();
 
-    // Echo the input line
     addLine(`visitor@randip:~$ ${raw || ''}`, 'user');
 
     if (raw) {
@@ -107,9 +139,12 @@ export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
         handler({
           args,
           addOutput: addLine,
+          addLink,
           clearOutput,
           onLaunch,
           onMatrix: () => setIsMatrixActive(true),
+          onBashrc: () => setIsBashrcActive(true),
+          onHack: () => setIsHackActive(true),
           onLegacy,
         });
       } else {
@@ -119,13 +154,15 @@ export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
     }
 
     setInputValue('');
+    setCursorPos(0);
+    setSelectionEnd(0);
     setHistoryIndex(-1);
-  }, [inputValue, addLine, clearOutput, onLaunch, onLegacy]);
+  }, [inputValue, addLine, addLink, clearOutput, onLaunch, onLegacy]);
 
   // ── Keyboard handling ──────────────────────────────────────────────────────
   const handleKeyDown = useCallback((e) => {
-    if (isBooting) {
-      if (e.key === 'Enter') skipBoot_();
+    if (isBooting || isHackActive) {
+      if (e.key === 'Enter' && isBooting) skipBoot_();
       return;
     }
 
@@ -136,16 +173,36 @@ export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
       setCmdHistory(prev => {
         const newIndex = Math.min(historyIndex + 1, prev.length - 1);
         setHistoryIndex(newIndex);
-        setInputValue(prev[newIndex] ?? '');
+        const val = prev[newIndex] ?? '';
+        setInputValue(val);
+        setCursorPos(val.length);
+        setSelectionEnd(val.length);
         return prev;
       });
     } else if (e.key === 'ArrowDown') {
       e.preventDefault();
       const newIndex = Math.max(historyIndex - 1, -1);
       setHistoryIndex(newIndex);
-      setInputValue(newIndex === -1 ? '' : cmdHistory[newIndex] ?? '');
+      const val = newIndex === -1 ? '' : cmdHistory[newIndex] ?? '';
+      setInputValue(val);
+      setCursorPos(val.length);
+      setSelectionEnd(val.length);
+    } else if (e.key === 'Tab') {
+      e.preventDefault();
+      if (suggestion) {
+        setInputValue(suggestion);
+        setCursorPos(suggestion.length);
+        setSelectionEnd(suggestion.length);
+      }
+    } else if (e.key === 'ArrowRight' && cursorPos === inputValue.length && suggestion) {
+      e.preventDefault();
+      setInputValue(suggestion);
+      setCursorPos(suggestion.length);
+      setSelectionEnd(suggestion.length);
+    } else {
+      syncCursor();
     }
-  }, [isBooting, historyIndex, cmdHistory, handleSubmit, skipBoot_]);
+  }, [isBooting, isHackActive, historyIndex, cmdHistory, handleSubmit, skipBoot_, syncCursor, suggestion, cursorPos, inputValue.length]);
 
   return (
     <div
@@ -156,9 +213,19 @@ export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
 
       {/* Scrollable output area */}
       <div className="terminal-output">
-        {outputLines.map(({ text, type, id }) => (
-          <div key={id} className={`terminal-line terminal-${type}`}>
-            {text || '\u00A0'}
+        {outputLines.map((item) => (
+          <div key={item.id} className={`terminal-line terminal-${item.type}`}>
+            {item.href ? (
+              <a
+                href={item.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                download={item.download || undefined}
+                style={{ color: '#00ffff', textDecoration: 'underline', cursor: 'pointer' }}
+              >
+                {item.text}
+              </a>
+            ) : (item.text || '\u00A0')}
           </div>
         ))}
         <div ref={bottomRef} />
@@ -168,14 +235,44 @@ export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
       {!isBooting && (
         <div className="terminal-input-row">
           <span className="terminal-prompt">visitor@randip:~$</span>
-          <span className="terminal-input-text">{inputValue}</span>
-          <span className="terminal-cursor" />
+
+          {/* Cursor / selection rendering */}
+          {cursorPos === selectionEnd ? (
+            <>
+              <span className="terminal-input-text">{inputValue.slice(0, cursorPos)}</span>
+              <span className="terminal-cursor" />
+              <span className="terminal-input-text">{inputValue.slice(cursorPos)}</span>
+            </>
+          ) : (
+            <>
+              <span className="terminal-input-text">{inputValue.slice(0, cursorPos)}</span>
+              <span className="terminal-selected-text">{inputValue.slice(cursorPos, selectionEnd)}</span>
+              <span className="terminal-input-text">{inputValue.slice(selectionEnd)}</span>
+            </>
+          )}
+
+          {/* Autocomplete ghost text */}
+          {suggestion && (
+            <span className="terminal-ghost-text">
+              {suggestion.slice(inputValue.length)}
+            </span>
+          )}
+
           <input
             ref={inputRef}
             type="text"
             value={inputValue}
-            onChange={e => setInputValue(e.target.value)}
+            onChange={e => {
+              setInputValue(e.target.value);
+              setCursorPos(e.target.selectionStart ?? e.target.value.length);
+              setSelectionEnd(e.target.selectionEnd ?? e.target.value.length);
+            }}
             onKeyDown={handleKeyDown}
+            onKeyUp={syncCursor}
+            onSelect={e => {
+              setCursorPos(e.target.selectionStart);
+              setSelectionEnd(e.target.selectionEnd);
+            }}
             className="terminal-hidden-input"
             autoFocus
             autoComplete="off"
@@ -199,11 +296,25 @@ export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
         />
       )}
 
+      {/* .bashrc popup */}
+      {isBashrcActive && (
+        <BashrcPopup onClose={() => setIsBashrcActive(false)} />
+      )}
+
+      {/* Hack sequence overlay */}
+      {isHackActive && (
+        <HackSequence
+          onClose={(msg) => {
+            setIsHackActive(false);
+            addLine(msg, 'success');
+          }}
+        />
+      )}
+
       {/* Boot skip hint */}
       {isBooting && (
         <>
           <div className="terminal-skip-hint">Press Enter to skip</div>
-          {/* Invisible input to capture Enter during boot */}
           <input
             type="text"
             onKeyDown={handleKeyDown}

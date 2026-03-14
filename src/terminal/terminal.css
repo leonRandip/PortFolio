@@ -126,6 +126,27 @@
   pointer-events: none;
 }
 
+/* ── Selection highlight ─────────────────────────────────── */
+
+.terminal-selected-text {
+  background: #00ff41;
+  color: #000d00;
+  font-size: 0.82rem;
+  letter-spacing: 0.025em;
+  white-space: pre;
+}
+
+/* ── Autocomplete ghost text ─────────────────────────────── */
+
+.terminal-ghost-text {
+  color: rgba(0, 255, 65, 0.35);
+  font-size: 0.82rem;
+  letter-spacing: 0.025em;
+  white-space: pre;
+  pointer-events: none;
+  user-select: none;
+}
+
 /* ── Animations ──────────────────────────────────────────── */
 
 @keyframes terminalBlink {

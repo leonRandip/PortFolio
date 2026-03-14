@@ -2,7 +2,7 @@
 // Command registry
 // Each key   = the full command string the user types
 // Each value = handler(context) where context is:
-//   { args, addOutput, clearOutput, onLaunch, onMatrix, onLegacy }
+//   { args, addOutput, addLink, clearOutput, onLaunch, onMatrix, onBashrc, onLegacy }
 //
 // To add a new command: add one entry here. That's it.
 // ─────────────────────────────────────────────────────────────────────────────
@@ -62,7 +62,6 @@ const SKILL_MAP = {
   ],
 };
 
-// Aliases → canonical key
 const SKILL_ALIASES = {
   JS: 'JAVASCRIPT', HTML5: 'HTML', CSS3: 'CSS',
   REACTJS: 'REACT', NODEJS: 'MERN', NODE: 'MERN',
@@ -84,10 +83,9 @@ function fingerHandler({ addOutput }) {
     '  │  Login : randip           Name  : Maria Randip Leon        │',
     '  │  Shell : /bin/zsh         Home  : /home/randip             │',
     '  ├─────────────────────────────────────────────────────────────┤',
-    '  │  Status: Currently hacking @ yavar.ai                      │',
-    '  │          Frontend Developer Intern                          │',
-    '  │  Open For: Full-time opportunities                          │',
-    '  │  Hire me : leonrandip@gmail.com                            │',
+    '  │  Status : Hired @ yavar.ai — Frontend Dev Intern           │',
+    '  │  After  : Open after internship concludes                  │',
+    '  │  Hire me: leonrandip@gmail.com                             │',
     '  └─────────────────────────────────────────────────────────────┘',
     '',
   ];
@@ -108,11 +106,14 @@ export const commands = {
       '  │  sudo init project-black    Launch portfolio                   │',
       '  │  sudo init self-destruct    ...                                │',
       '  │  whoami                     About me                           │',
-      '  │  finger <name>              Status & availability              │',
+      '  │  finger <name>              Status & contact info              │',
       '  │  ls                         List files                         │',
       '  │  ls -a                      List all files (incl. hidden)      │',
+      '  │  ls portfolio/              Explore portfolio directory        │',
       '  │  cat <filename>             Read a file                        │',
       '  │  grep -r "<skill>" .        Search projects by skill           │',
+      '  │  hack                       Initiate a breach sequence         │',
+      '  │  fullscreen                 Toggle fullscreen mode             │',
       '  │  matrix                     Enter the Matrix                   │',
       '  │  ssh guest@legacy           Connect to legacy portfolio        │',
       '  │  clear                      Clear terminal                     │',
@@ -135,11 +136,10 @@ export const commands = {
       '  Maria Randip Leon',
       '  ─────────────────────────────────────────────────',
       '  Full-Stack Web Developer',
-      '  Currently interning @ yavar.ai — Frontend Developer Intern',
+      '  Currently employed @ yavar.ai — Frontend Dev Intern',
       '',
       '  Stack  →  React · Node.js · Express · MongoDB · PostgreSQL',
       '  Focus  →  Clean code, great UX, and scalable systems.',
-      '  Status →  Open to full-time opportunities.',
       '',
     ];
     lines.forEach(l => addOutput(l, 'success'));
@@ -201,7 +201,7 @@ export const commands = {
     addOutput('', 'system');
     addOutput('  portfolio/    resume.pdf    .bashrc', 'system');
     addOutput('', 'system');
-    addOutput("  Tip: use 'ls -a' to reveal hidden files.", 'warning');
+    addOutput("  Tip: 'ls -a' reveals hidden files · 'ls portfolio/' to explore", 'warning');
     addOutput('', 'system');
   },
 
@@ -228,13 +228,41 @@ export const commands = {
     ]);
   },
 
+  // ── ls portfolio/ ─────────────────────────────────────────────────────────────
+  'ls portfolio/': ({ addOutput }) => {
+    addOutput('', 'system');
+    addOutput('  top_secret.txt   [CLASSIFIED]', 'warning');
+    addOutput('', 'system');
+    addOutput("  Type 'cat portfolio/top_secret.txt' to read.", 'system');
+    addOutput('', 'system');
+  },
+
   // ── cat (bare) ────────────────────────────────────────────────────────────────
   cat: ({ addOutput }) => {
     addOutput('', 'system');
     addOutput('Usage: cat <filename>', 'system');
-    addOutput("Try:   cat .secret_crush", 'warning');
+    addOutput("Try:   cat resume.pdf", 'warning');
+    addOutput("       cat .secret_crush", 'warning');
     addOutput("       cat .env_hopes_and_dreams", 'warning');
+    addOutput("       cat portfolio/top_secret.txt", 'warning');
     addOutput('', 'system');
+  },
+
+  // ── cat resume.pdf ────────────────────────────────────────────────────────────
+  'cat resume.pdf': ({ addOutput, addLink }) => {
+    addOutput('', 'system');
+    addOutput('[PDF] randips_resume.pdf  (44 KB)', 'success');
+    addOutput('', 'system');
+    addLink('  → [VIEW IN BROWSER]', '/files/randips_resume.pdf');
+    addLink('  → [DOWNLOAD]', '/files/randips_resume.pdf', 'randips_resume.pdf');
+    addOutput('', 'system');
+  },
+
+  // ── cat .bashrc ───────────────────────────────────────────────────────────────
+  'cat .bashrc': ({ addOutput, onBashrc }) => {
+    addOutput('', 'system');
+    addOutput('[SYS] Opening ~/.bashrc...', 'system');
+    setTimeout(() => onBashrc?.(), 400);
   },
 
   // ── cat .env_hopes_and_dreams ─────────────────────────────────────────────────
@@ -289,6 +317,20 @@ export const commands = {
     ]);
   },
 
+  // ── cat portfolio/top_secret.txt ──────────────────────────────────────────────
+  'cat portfolio/top_secret.txt': ({ addOutput, addLink }) => {
+    stagger([
+      [0,   () => addOutput('', 'warning')],
+      [50,  () => addOutput('  ██████████████████████████████████████████', 'warning')],
+      [100, () => addOutput('  TOP SECRET // CLEARANCE LEVEL: PUBLIC     ', 'warning')],
+      [150, () => addOutput('  ██████████████████████████████████████████', 'warning')],
+      [250, () => addOutput('', 'warning')],
+      [300, () => addOutput("  You found it. Here's the source of everything:", 'success')],
+      [350, () => addLink('  → github.com/leonRandip', 'https://github.com/leonRandip')],
+      [400, () => addOutput('', 'system')],
+    ]);
+  },
+
   // ── finger (bare) ─────────────────────────────────────────────────────────────
   finger: ({ addOutput }) => {
     addOutput('', 'system');
@@ -312,6 +354,45 @@ export const commands = {
       [1800, () => addOutput('[SYS] Loading legacy interface...', 'system')],
       [2400, () => onLegacy?.()],
     ]);
+  },
+
+  // ── fullscreen ────────────────────────────────────────────────────────────────
+  fullscreen: ({ addOutput }) => {
+    try {
+      if (document.fullscreenElement) {
+        document.exitFullscreen().catch(() => {});
+        stagger([
+          [0,   () => addOutput('', 'system')],
+          [80,  () => addOutput('[SYS] Exiting fullscreen...', 'system')],
+          [220, () => addOutput('[OK]  Fullscreen disabled.', 'success')],
+          [320, () => addOutput('', 'system')],
+        ]);
+      } else {
+        document.documentElement.requestFullscreen().catch(() => {
+          addOutput('[ERR] Fullscreen request denied by browser.', 'error');
+        });
+        stagger([
+          [0,   () => addOutput('', 'system')],
+          [80,  () => addOutput('[SYS] Requesting fullscreen...', 'system')],
+          [280, () => addOutput('[OK]  Fullscreen enabled. Press Esc to exit.', 'success')],
+          [380, () => addOutput('', 'system')],
+        ]);
+      }
+    } catch (_) {
+      addOutput('[ERR] Fullscreen not supported in this browser.', 'error');
+    }
+  },
+
+  // ── hack ──────────────────────────────────────────────────────────────────────
+  hack: ({ addOutput, onHack }) => {
+    stagger([
+      [0,    () => addOutput('', 'system')],
+      [80,   () => addOutput('[NET] Scanning target network...', 'warning')],
+      [380,  () => addOutput('[SYS] Identifying vulnerabilities...', 'warning')],
+      [760,  () => addOutput('[SYS] Target located. Preparing breach.', 'warning')],
+      [1100, () => addOutput('', 'system')],
+    ]);
+    setTimeout(() => onHack?.(), 1200);
   },
 
   // ── grep -r ───────────────────────────────────────────────────────────────────

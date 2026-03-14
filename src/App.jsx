@@ -52,6 +52,12 @@ export default function App() {
     setTimeout(() => { isTransitioning.current = false; }, 500);
   };
 
+  const handleMinimize = () => {
+    setIsMinimized(true);
+    setSkipBoot(true);
+    setView('terminal');
+  };
+
   const handleLegacy = () => {
     if (isTransitioning.current) return;
     isTransitioning.current = true;
@@ -105,10 +111,7 @@ export default function App() {
           <motion.div
             key="portfolio"
             initial={{ opacity: 0 }}
-            animate={{
-              opacity: isMinimized ? 0 : 1,
-              scale: isMinimized ? 0.88 : 1,
-            }}
+            animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.45, ease: 'easeIn' }}
             style={{ position: 'absolute', inset: 0 }}
@@ -147,21 +150,21 @@ export default function App() {
       {view === 'portfolio' && !IS_MOBILE && (
         <TrafficLights
           onClose={handleEject}
-          onMinimize={() => setIsMinimized(v => !v)}
+          onMinimize={handleMinimize}
           onFullscreen={handleFullscreen}
         />
       )}
 
       {/* Minimized dock bar */}
       <AnimatePresence>
-        {view === 'portfolio' && isMinimized && (
+        {isMinimized && view === 'terminal' && (
           <motion.button
             key="minimized-bar"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
             transition={{ duration: 0.25, ease: 'easeOut' }}
-            onClick={() => setIsMinimized(false)}
+            onClick={() => { setIsMinimized(false); setView('portfolio'); }}
             style={{
               position: 'fixed',
               bottom: '1.5rem',
