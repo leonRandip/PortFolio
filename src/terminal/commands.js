@@ -156,6 +156,8 @@ export const commands = {
       '  │  man randip                 Read the manual                    │',
       '  │  npm install randip         Install the developer              │',
       '  │  curl api.randip.dev/me     Fetch JSON profile                 │',
+      '  │  chat                       Chat with JARVIS AI agent          │',
+      '  │  jarvis                     Summon JARVIS directly             │',
       '  │  top                        Process monitor                    │',
       '  │  brickbreaker               Play brick breaker                 │',
       '  │  ssh guest@legacy           Connect to legacy portfolio        │',
@@ -651,6 +653,25 @@ export const commands = {
       '',
     ];
     lines.forEach((l, i) => setTimeout(() => addOutput(l, 'success'), i * 40));
+  },
+
+  // ── chat ──────────────────────────────────────────────────────────────────────
+  chat: ({ addOutput, onChat }) => {
+    stagger([
+      [0,   () => addOutput('', 'system')],
+      [80,  () => addOutput('[JARVIS] Initializing randip-agent v1.0...', 'warning')],
+      [320, () => addOutput('[JARVIS] Knowledge base loaded. Stand by.', 'warning')],
+      [500, () => onChat?.()],
+    ]);
+  },
+
+  // ── jarvis ────────────────────────────────────────────────────────────────────
+  jarvis: ({ addOutput, onChat }) => {
+    stagger([
+      [0,   () => addOutput('', 'system')],
+      [80,  () => addOutput("[JARVIS] Yes? I was hoping you'd call.", 'warning')],
+      [400, () => onChat?.()],
+    ]);
   },
 
   // ── top ───────────────────────────────────────────────────────────────────────

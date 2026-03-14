@@ -11,6 +11,13 @@ import RetroPortfolio from './components/RetroPortfolio';
 const IS_MOBILE = typeof window !== 'undefined' && window.innerWidth < 768;
 
 export default function App() {
+  // Wake up the Render backend so it's warm before the user types 'chat'
+  useEffect(() => {
+    if (import.meta.env.VITE_RENDER_URL) {
+      fetch(`${import.meta.env.VITE_RENDER_URL}/health`).catch(() => {});
+    }
+  }, []);
+
   const [view, setView] = useState(IS_MOBILE ? 'portfolio' : 'terminal');
   const [skipBoot, setSkipBoot] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);

@@ -7,6 +7,7 @@ import BashrcPopup from '../components/BashrcPopup';
 import HackSequence from '../components/HackSequence';
 import TopProcess from '../components/TopProcess';
 import BrickBreaker from '../components/BrickBreaker';
+import ChatOverlay from '../components/ChatOverlay';
 
 const BOOT_SEQUENCE = [
   { text: '[BIOS] Initializing hardware...', delay: 0 },
@@ -44,6 +45,7 @@ export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
   const [isHackActive, setIsHackActive] = useState(false);
   const [isTopActive, setIsTopActive] = useState(false);
   const [isBrickBreakerActive, setIsBrickBreakerActive] = useState(false);
+  const [isChatActive, setIsChatActive] = useState(false);
   const [cmdHistory, setCmdHistory] = useState([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
 
@@ -151,6 +153,7 @@ export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
           onHack: () => setIsHackActive(true),
           onTop: () => setIsTopActive(true),
           onBrickBreaker: () => setIsBrickBreakerActive(true),
+          onChat: () => setIsChatActive(true),
           onLegacy,
         });
       } else {
@@ -167,7 +170,7 @@ export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
 
   // ── Keyboard handling ──────────────────────────────────────────────────────
   const handleKeyDown = useCallback((e) => {
-    if (isBooting || isHackActive || isTopActive || isBrickBreakerActive) {
+    if (isBooting || isHackActive || isTopActive || isBrickBreakerActive || isChatActive) {
       if (e.key === 'Enter' && isBooting) skipBoot_();
       return;
     }
@@ -208,7 +211,7 @@ export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
     } else {
       syncCursor();
     }
-  }, [isBooting, isHackActive, isTopActive, isBrickBreakerActive, historyIndex, cmdHistory, handleSubmit, skipBoot_, syncCursor, suggestion, cursorPos, inputValue.length]);
+  }, [isBooting, isHackActive, isTopActive, isBrickBreakerActive, isChatActive, historyIndex, cmdHistory, handleSubmit, skipBoot_, syncCursor, suggestion, cursorPos, inputValue.length]);
 
   return (
     <div
@@ -315,6 +318,14 @@ export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
             addLine(msg, 'success');
           }}
         />
+      )}
+
+      {/* JARVIS AI chat */}
+      {isChatActive && (
+        <ChatOverlay onClose={(msg) => {
+          setIsChatActive(false);
+          if (msg) addLine(msg, 'success');
+        }} />
       )}
 
       {/* Top process monitor */}
