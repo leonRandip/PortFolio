@@ -1,32 +1,10 @@
 import React, { useRef, useState } from 'react';
+import { WebHaptics } from 'web-haptics';
 
 const THRESHOLD = 120;
 
-// ── Haptic helper — vibrate on Android, AudioContext click on iOS ────────────
-function haptic(pattern) {
-  if (navigator.vibrate) {
-    navigator.vibrate(pattern);
-    return;
-  }
-  // iOS Safari fallback: short tap sound via AudioContext
-  try {
-    const duration = Array.isArray(pattern)
-      ? pattern.filter((_, i) => i % 2 === 0).reduce((a, b) => a + b, 0)
-      : pattern;
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const osc  = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.type = 'sine';
-    osc.frequency.value = 880;
-    gain.gain.setValueAtTime(0.06, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + Math.min(duration, 80) / 1000);
-    osc.start(ctx.currentTime);
-    osc.stop(ctx.currentTime + 0.08);
-    ctx.close();
-  } catch (_) { /* silently ignore if audio is blocked */ }
-}
+// Single shared instance — WebHaptics injects the hidden iOS checkbox on first trigger
+const haptics = new WebHaptics();
 
 // ── Static terminal lines shown in the peek ──────────────────────────────────
 const PEEK_LINES = [
@@ -67,14 +45,14 @@ export default function EjectFooter({ onEject }) {
         const milestone = Math.floor(delta / 30) * 30;
         if (milestone > lastHapticMilestoneRef.current) {
           lastHapticMilestoneRef.current = milestone;
-          haptic(8);
-        }
+          haptics.trigger('selection');
+        } 
       }
 
       // Threshold reached: stronger double-pulse
       if (delta >= THRESHOLD && !triggeredRef.current) {
         triggeredRef.current = true;
-        haptic([60, 30, 60]);
+        haptics.trigger('success');
       }
     }
   };

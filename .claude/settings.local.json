@@ -1,4 +1,10 @@
 {
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:www.npmjs.com)",
+      "Bash(npm info:*)"
+    ]
+  },
   "enabledPlugins": {
     "everything-claude-code@everything-claude-code": true
   }
