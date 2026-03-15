@@ -50,10 +50,11 @@ export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
   const [cmdHistory, setCmdHistory] = useState([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
 
-  const bottomRef = useRef(null);
-  const inputRef = useRef(null);
-  const skipRef = useRef(false);
-  const bootDoneRef = useRef(false);
+  const bottomRef      = useRef(null);
+  const inputRef       = useRef(null);
+  const containerRef   = useRef(null);
+  const skipRef        = useRef(false);
+  const bootDoneRef    = useRef(false);
 
   // Read cursor + selection from the hidden input (after browser processes the event)
   const syncCursor = useCallback(() => {
@@ -126,6 +127,23 @@ export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
       setTimeout(() => inputRef.current?.focus(), 60);
     }
   }, [isChatActive, isGordonActive, isHackActive, isTopActive, isBrickBreakerActive, isMatrixActive]);
+
+  // ── Keyboard-aware resize (mobile) ────────────────────────────────────────
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const update = () => {
+      containerRef.current?.style.setProperty('--terminal-h', `${vv.height}px`);
+      // Scroll output to bottom so input stays visible when keyboard opens
+      bottomRef.current?.scrollIntoView({ behavior: 'instant' });
+    };
+    vv.addEventListener('resize', update);
+    vv.addEventListener('scroll', update);
+    return () => {
+      vv.removeEventListener('resize', update);
+      vv.removeEventListener('scroll', update);
+    };
+  }, []);
 
   // ── Skip boot ─────────────────────────────────────────────────────────────
   const skipBoot_ = useCallback(() => {
@@ -212,6 +230,18 @@ export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
         setCursorPos(suggestion.length);
         setSelectionEnd(suggestion.length);
       }
+    } else if (
+      e.key === ' ' &&
+      suggestion &&
+      window.matchMedia('(max-width: 768px)').matches
+    ) {
+      // Mobile: space completes the autocomplete suggestion instead of adding a space.
+      // Only fires when ghost text is visible (suggestion !== ''), so typing
+      // arguments after a completed command (e.g. "cowsay hello") is unaffected.
+      e.preventDefault();
+      setInputValue(suggestion);
+      setCursorPos(suggestion.length);
+      setSelectionEnd(suggestion.length);
     } else if (e.key === 'ArrowRight' && cursorPos === inputValue.length && suggestion) {
       e.preventDefault();
       setInputValue(suggestion);
@@ -224,6 +254,7 @@ export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
 
   return (
     <div
+      ref={containerRef}
       className="terminal-container"
       onClick={() => inputRef.current?.focus()}
     >
@@ -300,6 +331,18 @@ export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
             inputMode="text"
             aria-label="Terminal input"
           />
+
+          {/* Send button — mobile only (hidden via CSS on desktop) */}
+          <button
+            className="terminal-send-btn"
+            onPointerDown={e => { e.preventDefault(); handleSubmit(); inputRef.current?.focus(); }}
+            aria-label="Send"
+            tabIndex={-1}
+          >
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M1 7h12M7 1l6 6-6 6" stroke="#00ff41" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
         </div>
       )}
 

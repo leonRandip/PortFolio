@@ -153,3 +153,75 @@
   0%, 100% { opacity: 1; }
   50%       { opacity: 0; }
 }
+
+/* ── Mobile ──────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .terminal-container {
+    padding: 1rem 1rem 0.75rem;
+    /* height is driven by --terminal-h set via visualViewport in JS */
+    height: var(--terminal-h, 100dvh);
+  }
+
+  .terminal-line {
+    font-size: 0.78rem;
+    line-height: 1.6;
+  }
+
+  .terminal-prompt {
+    font-size: 0.72rem;
+  }
+
+  .terminal-input-text,
+  .terminal-selected-text,
+  .terminal-ghost-text {
+    font-size: 0.78rem;
+  }
+
+  /* Make the hidden input cover the whole row so any tap opens keyboard */
+  .terminal-hidden-input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: auto;
+    left: 0;
+    font-size: 16px; /* prevents iOS auto-zoom */
+  }
+
+  .terminal-input-row {
+    padding: 0.35rem 0 0.5rem;
+    gap: 0.35rem;
+  }
+}
+
+/* ── Mobile send button ──────────────────────────────────── */
+
+.terminal-send-btn {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .terminal-send-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 1.9rem;
+    height: 1.9rem;
+    border: 1px solid rgba(0, 255, 65, 0.35);
+    border-radius: 4px;
+    background: rgba(0, 255, 65, 0.07);
+    color: #00ff41;
+    cursor: pointer;
+    padding: 0;
+    /* keep above scanlines */
+    position: relative;
+    z-index: 3;
+  }
+
+  .terminal-send-btn:active {
+    background: rgba(0, 255, 65, 0.2);
+  }
+}
