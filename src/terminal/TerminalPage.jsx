@@ -119,6 +119,13 @@ export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [outputLines]);
 
+  // ── Restore terminal focus whenever any overlay closes ─────────────────────
+  useEffect(() => {
+    if (!isChatActive && !isHackActive && !isTopActive && !isBrickBreakerActive && !isMatrixActive) {
+      setTimeout(() => inputRef.current?.focus(), 60);
+    }
+  }, [isChatActive, isHackActive, isTopActive, isBrickBreakerActive, isMatrixActive]);
+
   // ── Skip boot ─────────────────────────────────────────────────────────────
   const skipBoot_ = useCallback(() => {
     skipRef.current = true;

@@ -4,7 +4,7 @@ const COLS = 8;
 const ROWS = 5;
 const BRICK_H = 22;
 const BRICK_GAP = 4;
-const PADDLE_W = 80;
+const PADDLE_W = 130;
 const PADDLE_H = 10;
 const BALL_R = 7;
 const INIT_SPEED = 4.5;
@@ -149,8 +149,8 @@ export default function BrickBreaker({ onClose }) {
       }
 
       // Paddle movement via keyboard
-      if (keys.left)  paddleX = Math.max(0, paddleX - 6);
-      if (keys.right) paddleX = Math.min(cw - PADDLE_W, paddleX + 6);
+      if (keys.left)  paddleX = Math.max(0, paddleX - 10);
+      if (keys.right) paddleX = Math.min(cw - PADDLE_W, paddleX + 10);
 
       // Ball physics
       ballX += ballSpeedX;

@@ -97,7 +97,13 @@ export default function ChatOverlay({ onClose }) {
 
   // ── Focus input on mount ────────────────────────────────────────────────────
   useEffect(() => {
-    setTimeout(() => inputRef.current?.focus(), 80);
+    // Double-rAF ensures the overlay is painted before we steal focus,
+    // which matters on iOS where programmatic focus needs the paint cycle.
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        inputRef.current?.focus();
+      });
+    });
   }, []);
 
   // ── Send message ────────────────────────────────────────────────────────────
@@ -194,6 +200,7 @@ export default function ChatOverlay({ onClose }) {
             letterSpacing: '0.025em',
             caretColor: '#00ff41',
           }}
+          autoFocus
           autoComplete="off"
           autoCorrect="off"
           spellCheck="false"
