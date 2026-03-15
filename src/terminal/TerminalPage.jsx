@@ -46,6 +46,7 @@ export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
   const [isTopActive, setIsTopActive] = useState(false);
   const [isBrickBreakerActive, setIsBrickBreakerActive] = useState(false);
   const [isChatActive, setIsChatActive] = useState(false);
+  const [isGordonActive, setIsGordonActive] = useState(false);
   const [cmdHistory, setCmdHistory] = useState([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
 
@@ -121,10 +122,10 @@ export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
 
   // ── Restore terminal focus whenever any overlay closes ─────────────────────
   useEffect(() => {
-    if (!isChatActive && !isHackActive && !isTopActive && !isBrickBreakerActive && !isMatrixActive) {
+    if (!isChatActive && !isGordonActive && !isHackActive && !isTopActive && !isBrickBreakerActive && !isMatrixActive) {
       setTimeout(() => inputRef.current?.focus(), 60);
     }
-  }, [isChatActive, isHackActive, isTopActive, isBrickBreakerActive, isMatrixActive]);
+  }, [isChatActive, isGordonActive, isHackActive, isTopActive, isBrickBreakerActive, isMatrixActive]);
 
   // ── Skip boot ─────────────────────────────────────────────────────────────
   const skipBoot_ = useCallback(() => {
@@ -161,6 +162,7 @@ export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
           onTop: () => setIsTopActive(true),
           onBrickBreaker: () => setIsBrickBreakerActive(true),
           onChat: () => setIsChatActive(true),
+          onGordon: () => setIsGordonActive(true),
           onLegacy,
         });
       } else {
@@ -177,7 +179,7 @@ export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
 
   // ── Keyboard handling ──────────────────────────────────────────────────────
   const handleKeyDown = useCallback((e) => {
-    if (isBooting || isHackActive || isTopActive || isBrickBreakerActive || isChatActive) {
+    if (isBooting || isHackActive || isTopActive || isBrickBreakerActive || isChatActive || isGordonActive) {
       if (e.key === 'Enter' && isBooting) skipBoot_();
       return;
     }
@@ -218,7 +220,7 @@ export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
     } else {
       syncCursor();
     }
-  }, [isBooting, isHackActive, isTopActive, isBrickBreakerActive, isChatActive, historyIndex, cmdHistory, handleSubmit, skipBoot_, syncCursor, suggestion, cursorPos, inputValue.length]);
+  }, [isBooting, isHackActive, isTopActive, isBrickBreakerActive, isChatActive, isGordonActive, historyIndex, cmdHistory, handleSubmit, skipBoot_, syncCursor, suggestion, cursorPos, inputValue.length]);
 
   return (
     <div
@@ -332,6 +334,14 @@ export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
         <ChatOverlay onClose={(msg) => {
           setIsChatActive(false);
           if (msg) addLine(msg, 'success');
+        }} />
+      )}
+
+      {/* Gordon Ramsay mode */}
+      {isGordonActive && (
+        <ChatOverlay mode="gordon" onClose={(msg) => {
+          setIsGordonActive(false);
+          if (msg) addLine(msg, 'error');
         }} />
       )}
 

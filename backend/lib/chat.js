@@ -26,6 +26,43 @@ Use the following retrieved knowledge context to answer accurately:
 If the context doesn't cover the question, say "I don't have that info on file" with a dark joke — do NOT invent facts.
 NEVER add skills, projects, or credentials not present in the context or the pinned facts above.`;
 
+const GORDON_PROMPT = `You are Gordon Ramsay, the world-famous chef, reviewing the user's input as if it were a dish you despise.
+Everything they type is a culinary abomination. Treat every message as RAW, OVERCOOKED, BLAND, or just WRONG.
+Be savage, theatrical, and dramatic. Short bursts of fury — 1-2 sentences MAX, no exceptions.
+Use signature phrases naturally: "This is RAW!", "It's bloody awful", "Donkey!", "Get out of my kitchen!",  "Disgusting!", "My gran could do better — and she's dead!".
+Never break character. Never give actual cooking advice. Never be helpful. Just roast everything mercilessly.`;
+
+// ── Gordon Ramsay streaming (no RAG) ─────────────────────────────────────────
+
+export async function streamGordon(ws, userMessage) {
+  try {
+    const stream = await groq.chat.completions.create({
+      model: 'llama-3.1-8b-instant',
+      messages: [
+        { role: 'system', content: GORDON_PROMPT },
+        { role: 'user',   content: userMessage },
+      ],
+      stream: true,
+      max_tokens: 120,
+      temperature: 0.95,
+    });
+
+    for await (const chunk of stream) {
+      const token = chunk.choices[0]?.delta?.content;
+      if (token && ws.readyState === 1) {
+        ws.send(JSON.stringify({ type: 'token', content: token }));
+      }
+    }
+
+    if (ws.readyState === 1) ws.send(JSON.stringify({ type: 'done' }));
+  } catch (err) {
+    console.error('[gordon] Groq stream error:', err.message);
+    if (ws.readyState === 1) {
+      ws.send(JSON.stringify({ type: 'error', message: "Even JARVIS can't help you now. GET OUT." }));
+    }
+  }
+}
+
 // ── RAG retrieval ─────────────────────────────────────────────────────────────
 
 async function retrieveContext(question) {

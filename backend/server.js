@@ -2,7 +2,7 @@ import 'dotenv/config';
 import http from 'http';
 import express from 'express';
 import { WebSocketServer } from 'ws';
-import { streamAnswer } from './lib/chat.js';
+import { streamAnswer, streamGordon } from './lib/chat.js';
 import { ingestAll, refreshGitHubIfStale, isKnowledgeBaseEmpty } from './lib/ingest.js';
 
 const app = express();
@@ -52,7 +52,11 @@ wss.on('connection', (ws, req) => {
     if (payload.type === 'chat' && typeof payload.message === 'string') {
       const message = payload.message.trim();
       if (!message) return;
-      await streamAnswer(ws, message);
+      if (payload.mode === 'gordon') {
+        await streamGordon(ws, message);
+      } else {
+        await streamAnswer(ws, message);
+      }
     }
   });
 

@@ -15,7 +15,33 @@ const overlay = {
   fontSize: '0.82rem',
 };
 
-export default function ChatOverlay({ onClose }) {
+const GORDON = {
+  accent:      '#ff4500',
+  dim:         'rgba(255,69,0,0.35)',
+  border:      'rgba(255,69,0,0.25)',
+  label:       '[GORDON]',
+  header:      '[GORDON RAMSAY] Unhinged Mode v1.0',
+  statusReady: 'fury loaded',
+  placeholder: 'Type something. I dare you.',
+  exitMsg:     'GORDON: Get out of my kitchen.',
+  disclaimer: '⚠ WARNING: Gordon has entered Unhinged Mode. Feelings will not be spared.',
+};
+
+const JARVIS = {
+  accent:      '#ffb800',
+  dim:         'rgba(0,255,65,0.4)',
+  border:      'rgba(0,255,65,0.2)',
+  label:       '[JARVIS]',
+  header:      '[JARVIS] randip-agent v1.0',
+  statusReady: 'knowledge loaded',
+  placeholder: 'Ask me anything...',
+  exitMsg:     'JARVIS: session terminated.',
+  disclaimer:  null,
+};
+
+export default function ChatOverlay({ onClose, mode = 'jarvis' }) {
+  const cfg = mode === 'gordon' ? GORDON : JARVIS;
+
   const [messages, setMessages]   = useState([]);
   const [input, setInput]         = useState('');
   const [streaming, setStreaming] = useState(false);
@@ -84,7 +110,7 @@ export default function ChatOverlay({ onClose }) {
   // ── Keyboard: Escape exits ──────────────────────────────────────────────────
   useEffect(() => {
     const handle = (e) => {
-      if (e.key === 'Escape') onCloseRef.current('JARVIS: session terminated.');
+      if (e.key === 'Escape') onCloseRef.current(cfg.exitMsg);
     };
     window.addEventListener('keydown', handle);
     return () => window.removeEventListener('keydown', handle);
@@ -111,13 +137,13 @@ export default function ChatOverlay({ onClose }) {
     const text = input.trim();
     if (!text || streaming) return;
     if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
-      setMessages(prev => [...prev, { role: 'agent', content: "[JARVIS] I'm not connected right now. Try again in a moment." }]);
+      setMessages(prev => [...prev, { role: 'agent', content: `${cfg.label} I'm not connected right now. Try again in a moment.` }]);
       return;
     }
     setMessages(prev => [...prev, { role: 'user', content: text }]);
     setInput('');
     setStreaming(true);
-    wsRef.current.send(JSON.stringify({ type: 'chat', message: text }));
+    wsRef.current.send(JSON.stringify({ type: 'chat', message: text, mode }));
   }, [input, streaming]);
 
   const handleKeyDown = useCallback((e) => {
@@ -126,24 +152,33 @@ export default function ChatOverlay({ onClose }) {
 
   // ── Status colour ───────────────────────────────────────────────────────────
   const statusColor = wsStatus === 'open' ? '#00ff41' : wsStatus === 'error' ? '#ff4444' : '#ffb800';
-  const statusText  = wsStatus === 'open' ? 'knowledge loaded' : wsStatus === 'error' ? 'connection failed' : 'connecting...';
+  const statusText  = wsStatus === 'open' ? cfg.statusReady : wsStatus === 'error' ? 'connection failed' : 'connecting...';
 
   return (
     <div style={overlay} onClick={() => inputRef.current?.focus()}>
       {/* ── Header ─────────────────────────────────────────────────────── */}
-      <div style={{ color: '#ffb800', marginBottom: '0.4rem', letterSpacing: '0.06em', flexShrink: 0 }}>
-        [JARVIS] randip-agent v1.0
+      <div style={{ color: cfg.accent, marginBottom: '0.4rem', letterSpacing: '0.06em', flexShrink: 0 }}>
+        {cfg.header}
         <span style={{ color: statusColor, marginLeft: '1rem', fontSize: '0.72rem' }}>
           ● {statusText}
         </span>
       </div>
-      <div style={{ borderTop: '1px solid rgba(0,255,65,0.2)', marginBottom: '0.75rem', flexShrink: 0 }} />
+      <div style={{ borderTop: `1px solid ${cfg.border}`, marginBottom: cfg.disclaimer ? '0.4rem' : '0.75rem', flexShrink: 0 }} />
+
+      {/* ── Gordon disclaimer ───────────────────────────────────────────── */}
+      {cfg.disclaimer && (
+        <div style={{ color: cfg.accent, fontSize: '0.74rem', marginBottom: '0.6rem', fontWeight: 'bold', flexShrink: 0 }}>
+          {cfg.disclaimer}
+        </div>
+      )}
 
       {/* ── Message history ─────────────────────────────────────────────── */}
       <div style={{ flex: 1, overflowY: 'auto', scrollbarWidth: 'none', paddingBottom: '0.5rem' }}>
         {messages.length === 0 && (
-          <div style={{ color: 'rgba(0,255,65,0.4)', fontSize: '0.76rem', marginTop: '0.5rem' }}>
-            Ask me about Randip&apos;s skills, projects, experience, or anything else.
+          <div style={{ color: cfg.dim, fontSize: '0.76rem', marginTop: '0.5rem' }}>
+            {mode === 'gordon'
+              ? "Say something. He's watching. He's judging."
+              : "Ask me about Randip's skills, projects, experience, or anything else."}
             <br />Press Esc to exit.
           </div>
         )}
@@ -156,8 +191,8 @@ export default function ChatOverlay({ onClose }) {
                 {msg.content}
               </div>
             ) : (
-              <div style={{ color: '#00ff41', paddingLeft: '1rem', borderLeft: '2px solid rgba(0,255,65,0.3)' }}>
-                <span style={{ color: '#ffb800', marginRight: '0.5rem' }}>[JARVIS]</span>
+              <div style={{ color: mode === 'gordon' ? '#ffcfb3' : '#00ff41', paddingLeft: '1rem', borderLeft: `2px solid ${cfg.border}` }}>
+                <span style={{ color: cfg.accent, marginRight: '0.5rem' }}>{cfg.label}</span>
                 <span style={{ whiteSpace: 'pre-wrap' }}>{msg.content}</span>
               </div>
             )}
@@ -166,8 +201,8 @@ export default function ChatOverlay({ onClose }) {
 
         {/* Streaming indicator */}
         {streaming && (
-          <div style={{ color: '#ffb800', paddingLeft: '1rem', borderLeft: '2px solid rgba(0,255,65,0.3)' }}>
-            <span style={{ marginRight: '0.5rem' }}>[JARVIS]</span>
+          <div style={{ color: cfg.accent, paddingLeft: '1rem', borderLeft: `2px solid ${cfg.border}` }}>
+            <span style={{ marginRight: '0.5rem' }}>{cfg.label}</span>
             <span className="jarvis-typing">...</span>
           </div>
         )}
@@ -176,11 +211,11 @@ export default function ChatOverlay({ onClose }) {
       </div>
 
       {/* ── Divider ─────────────────────────────────────────────────────── */}
-      <div style={{ borderTop: '1px solid rgba(0,255,65,0.2)', margin: '0.5rem 0', flexShrink: 0 }} />
+      <div style={{ borderTop: `1px solid ${cfg.border}`, margin: '0.5rem 0', flexShrink: 0 }} />
 
       {/* ── Input row ───────────────────────────────────────────────────── */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
-        <span style={{ color: '#00ff41', flexShrink: 0 }}>{'>'}</span>
+        <span style={{ color: mode === 'gordon' ? cfg.accent : '#00ff41', flexShrink: 0 }}>{'>'}</span>
         <input
           ref={inputRef}
           type="text"
@@ -188,7 +223,7 @@ export default function ChatOverlay({ onClose }) {
           onChange={e => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           disabled={streaming}
-          placeholder={streaming ? '' : 'Ask me anything...'}
+          placeholder={streaming ? '' : cfg.placeholder}
           style={{
             flex: 1,
             background: 'transparent',
@@ -198,14 +233,14 @@ export default function ChatOverlay({ onClose }) {
             fontFamily: '"JetBrains Mono", "Courier New", monospace',
             fontSize: '0.82rem',
             letterSpacing: '0.025em',
-            caretColor: '#00ff41',
+            caretColor: mode === 'gordon' ? cfg.accent : '#00ff41',
           }}
           autoFocus
           autoComplete="off"
           autoCorrect="off"
           spellCheck="false"
         />
-        <span style={{ color: 'rgba(0,255,65,0.25)', fontSize: '0.68rem', flexShrink: 0 }}>
+        <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: '0.68rem', flexShrink: 0 }}>
           Esc exit
         </span>
       </div>
