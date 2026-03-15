@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Github, ExternalLink, Mail, Linkedin } from "lucide-react";
 import { Analytics } from "@vercel/analytics/react";
 import { BackgroundBeams } from "./components/BackgroundBeams";
@@ -9,14 +9,16 @@ import EjectFooter from "./components/EjectFooter";
 export default function PortfolioClone({ onEject, isMobile }) {
   const [isScrolling, setIsScrolling] = useState(false);
   const [activePage, setActivePage] = useState(1);
+  // FIX #4: use a ref instead of window.scrollTimeout to avoid global pollution
+  const scrollTimeoutRef = useRef(null);
+
+  useEffect(() => () => clearTimeout(scrollTimeoutRef.current), []);
 
   const handleScroll = () => {
-    // Set scrolling to true immediately
     setIsScrolling(true);
 
-    // Clear previous timeout and set new one
-    clearTimeout(window.scrollTimeout);
-    window.scrollTimeout = setTimeout(() => setIsScrolling(false), 1500);
+    clearTimeout(scrollTimeoutRef.current);
+    scrollTimeoutRef.current = setTimeout(() => setIsScrolling(false), 1500);
 
     // Check which section is currently in viewport (only visible sections)
     const sections = document.querySelectorAll("section");
