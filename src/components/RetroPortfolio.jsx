@@ -52,9 +52,9 @@ export default function RetroPortfolio({ onExit }) {
     };
 
     let cleanup;
-    fetch('https://api.countapi.xyz/hit/randipleon.vercel.app/visits')
+    fetch('https://counterapi.dev/api/randipleon.vercel.app/visits/hit')
       .then(r => r.json())
-      .then(data => { cleanup = animateTo(data.value || 1337); })
+      .then(data => { cleanup = animateTo(data.count || 1337); })
       .catch(() => { cleanup = animateTo(1337); });
 
     return () => cleanup?.();
