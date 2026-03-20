@@ -41,21 +41,8 @@ const JARVIS = {
   msgColor:    '#00ff41',
 };
 
-const MINUTES = {
-  accent:      '#FF6B00',
-  dim:         'rgba(255,107,0,0.35)',
-  border:      'rgba(255,107,0,0.25)',
-  label:       '[MISS MINUTES]',
-  header:      'TVA — Miss Minutes v\u221E',
-  statusReady: 'Sacred Timeline synced',
-  placeholder: 'Ask Miss Minutes anything, sugah...',
-  exitMsg:     'MINUTES: Y\'all come back now, ya hear?',
-  disclaimer:  '\u23F1 TIME VARIANCE AUTHORITY — Protecting the Sacred Timeline',
-  msgColor:    '#FFB347',
-};
-
 export default function ChatOverlay({ onClose, mode = 'jarvis' }) {
-  const cfg = mode === 'gordon' ? GORDON : mode === 'minutes' ? MINUTES : JARVIS;
+  const cfg = mode === 'gordon' ? GORDON : JARVIS;
 
   const [messages, setMessages]   = useState([]);
   const [input, setInput]         = useState('');
@@ -193,8 +180,6 @@ export default function ChatOverlay({ onClose, mode = 'jarvis' }) {
           <div style={{ color: cfg.dim, fontSize: '0.76rem', marginTop: '0.5rem' }}>
             {mode === 'gordon'
               ? "Say something. He's watching. He's judging."
-              : mode === 'minutes'
-              ? "Ask Miss Minutes anything. She knows all... or so the TVA says."
               : "Ask me about Randip's skills, projects, experience, or anything else."}
             <br />Press Esc to exit.
           </div>
@@ -232,7 +217,7 @@ export default function ChatOverlay({ onClose, mode = 'jarvis' }) {
 
       {/* ── Input row ───────────────────────────────────────────────────── */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
-        <span style={{ color: (mode === 'gordon' || mode === 'minutes') ? cfg.accent : '#00ff41', flexShrink: 0 }}>{'>'}</span>
+        <span style={{ color: mode === 'gordon' ? cfg.accent : '#00ff41', flexShrink: 0 }}>{'>'}</span>
         <input
           ref={inputRef}
           type="text"
@@ -250,7 +235,7 @@ export default function ChatOverlay({ onClose, mode = 'jarvis' }) {
             fontFamily: '"JetBrains Mono", "Courier New", monospace',
             fontSize: '0.82rem',
             letterSpacing: '0.025em',
-            caretColor: (mode === 'gordon' || mode === 'minutes') ? cfg.accent : '#00ff41',
+            caretColor: mode === 'gordon' ? cfg.accent : '#00ff41',
           }}
           autoFocus
           autoComplete="off"

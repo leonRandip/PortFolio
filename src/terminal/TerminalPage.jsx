@@ -8,6 +8,7 @@ import HackSequence from '../components/HackSequence';
 import TopProcess from '../components/TopProcess';
 import BrickBreaker from '../components/BrickBreaker';
 import ChatOverlay from '../components/ChatOverlay';
+import MissMinutes from '../components/MissMinutes';
 import soundEngine from '../audio/soundEngine';
 import { useTheme } from '../themes/useTheme';
 
@@ -52,8 +53,9 @@ export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
   const [isBrickBreakerActive, setIsBrickBreakerActive] = useState(false);
   const [isChatActive, setIsChatActive]         = useState(false);
   const [isGordonActive, setIsGordonActive]     = useState(false);
-  const [isMinutesActive, setIsMinutesActive]   = useState(false);
   const [isHireActive, setIsHireActive]         = useState(false);
+  const [lastCommand, setLastCommand]           = useState('');
+  const [commandCounter, setCommandCounter]     = useState(0);
   const [multiplayerMode, setMultiplayerMode]   = useState(null); // null | { roomId, role }
   const [cmdHistory, setCmdHistory]             = useState([]);
   const [historyIndex, setHistoryIndex]         = useState(-1);
@@ -139,13 +141,10 @@ export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
 
   // ── Restore terminal focus whenever any overlay closes ─────────────────────
   useEffect(() => {
-    if (
-      !isChatActive && !isGordonActive && !isMinutesActive &&
-      !isHackActive && !isTopActive && !isBrickBreakerActive && !isMatrixActive
-    ) {
+    if (!isChatActive && !isGordonActive && !isHackActive && !isTopActive && !isBrickBreakerActive && !isMatrixActive) {
       setTimeout(() => inputRef.current?.focus(), 60);
     }
-  }, [isChatActive, isGordonActive, isMinutesActive, isHackActive, isTopActive, isBrickBreakerActive, isMatrixActive]);
+  }, [isChatActive, isGordonActive, isHackActive, isTopActive, isBrickBreakerActive, isMatrixActive]);
 
   // ── Keyboard-aware resize (mobile) ────────────────────────────────────────
   useEffect(() => {
@@ -287,6 +286,10 @@ export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
       const { command, args } = parseCommand(raw, commands);
       const handler = commands[command];
 
+      // Track for Miss Minutes reactions (use matched command key if found, else raw)
+      setLastCommand(command || raw);
+      setCommandCounter(prev => prev + 1);
+
       if (handler) {
         handler({
           args,
@@ -301,7 +304,6 @@ export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
           onBrickBreaker: () => setIsBrickBreakerActive(true),
           onChat:         () => setIsChatActive(true),
           onGordon:       () => setIsGordonActive(true),
-          onMinutes:      () => setIsMinutesActive(true),
           onHireLock:     () => setIsHireActive(true),
           onHireUnlock:   () => setIsHireActive(false),
           onTheme:        switchTheme,
@@ -321,11 +323,12 @@ export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
     setSelectionEnd(0);
     setHistoryIndex(-1);
   }, [inputValue, addLine, addLink, clearOutput, onLaunch, onLegacy, promptLabel,
-      switchTheme, multiplayerMode, onSessionStart, onSessionJoin, onSessionEnd]);
+      switchTheme, multiplayerMode, onSessionStart, onSessionJoin, onSessionEnd,
+      setLastCommand, setCommandCounter]);
 
   // ── Keyboard handling ──────────────────────────────────────────────────────
   const handleKeyDown = useCallback((e) => {
-    if (isBooting || isHireActive || isHackActive || isTopActive || isBrickBreakerActive || isChatActive || isGordonActive || isMinutesActive) {
+    if (isBooting || isHireActive || isHackActive || isTopActive || isBrickBreakerActive || isChatActive || isGordonActive) {
       if (e.key === 'Enter' && isBooting) skipBoot_();
       return;
     }
@@ -377,7 +380,7 @@ export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
     }
   }, [
     isBooting, isHireActive, isHackActive, isTopActive, isBrickBreakerActive,
-    isChatActive, isGordonActive, isMinutesActive,
+    isChatActive, isGordonActive,
     historyIndex, cmdHistory, handleSubmit, skipBoot_, syncCursor,
     suggestion, cursorPos, inputValue.length,
   ]);
@@ -531,14 +534,6 @@ export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
         }} />
       )}
 
-      {/* Miss Minutes (TVA) */}
-      {isMinutesActive && (
-        <ChatOverlay mode="minutes" onClose={(msg) => {
-          setIsMinutesActive(false);
-          if (msg) addLine(msg, 'warning');
-        }} />
-      )}
-
       {/* Top process monitor */}
       {isTopActive && (
         <TopProcess onClose={() => {
@@ -554,6 +549,11 @@ export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
           setIsBrickBreakerActive(false);
           addLine(msg, 'success');
         }} />
+      )}
+
+      {/* Miss Minutes — ambient TVA Clippy (only in TVA theme, after boot) */}
+      {theme === 'tva' && !isBooting && (
+        <MissMinutes lastCommand={lastCommand} commandCounter={commandCounter} />
       )}
 
       {/* Boot skip hint */}

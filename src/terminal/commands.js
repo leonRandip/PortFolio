@@ -39,6 +39,9 @@ const FORTUNES = [
   '"Weeks of coding can save you hours of planning." — unknown',
 ];
 
+// ── Backend URL (same env var used by TerminalPage + ChatOverlay) ────────────
+const API_URL = import.meta.env.VITE_RENDER_URL || 'http://localhost:3001';
+
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 function randomHex() {
@@ -159,7 +162,7 @@ export const commands = {
       '  │  chat                       Chat with JARVIS AI agent           │',
       '  │  jarvis                     Summon JARVIS directly              │',
       '  │  gordon                     Gordon Ramsay mode (unhinged)       │',
-      '  │  minutes                    Chat with Miss Minutes (TVA)        │',
+      '  │  minutes                    Summon Miss Minutes (TVA theme only) │',
       '  │  top                        Process monitor                     │',
       '  │  brickbreaker               Play brick breaker                  │',
       '  │  ssh guest@legacy           Connect to legacy portfolio         │',
@@ -726,8 +729,6 @@ export const commands = {
     const message = args.slice(0, atIdx).join(' ');
     const org     = args.slice(atIdx + 1).join(' ');
 
-    const API = import.meta.env.VITE_RENDER_URL || 'http://localhost:3001';
-
     onHireLock?.();
 
     stagger([
@@ -738,7 +739,7 @@ export const commands = {
       [1550, () => addOutput('[ENC] Encrypting message...  [██████████] 100%', 'system')],
       [1900, () => addOutput('[NET] Routing to leonrandip@gmail.com...', 'system')],
       [1900, () => {
-        fetch(`${API}/hire`, {
+        fetch(`${API_URL}/hire`, {
           method:  'POST',
           headers: { 'Content-Type': 'application/json' },
           body:    JSON.stringify({ message, org }),
@@ -804,11 +805,12 @@ export const commands = {
   },
 
   // ── minutes ───────────────────────────────────────────────────────────────────
-  minutes: ({ addOutput, onMinutes }) => {
+  minutes: ({ addOutput }) => {
     stagger([
       [0,   () => addOutput('', 'system')],
-      [80,  () => addOutput('[MINUTES] Oh, well hey there, sugah! TVA systems comin\' online.', 'warning')],
-      [400, () => onMinutes?.()],
+      [80,  () => addOutput("[MINUTES] I'm already here, sugah. I see everything.", 'warning')],
+      [320, () => addOutput('[MINUTES] Activate TVA theme to summon me: theme tva', 'warning')],
+      [560, () => addOutput('', 'system')],
     ]);
   },
 
