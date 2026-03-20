@@ -40,7 +40,7 @@ const FORTUNES = [
 ];
 
 // ── Backend URL (same env var used by TerminalPage + ChatOverlay) ────────────
-const API_URL = import.meta.env.VITE_RENDER_URL || 'http://localhost:3001';
+const API_URL = import.meta.env.VITE_RENDER_URL || 'https://portfolio-4myk.onrender.com';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 

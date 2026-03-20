@@ -12,8 +12,8 @@ import MissMinutes from '../components/MissMinutes';
 import soundEngine from '../audio/soundEngine';
 import { useTheme } from '../themes/useTheme';
 
-const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:3001/ws';
-const API_URL = import.meta.env.VITE_RENDER_URL || 'http://localhost:3001';
+const WS_URL = import.meta.env.VITE_WS_URL || 'wss://portfolio-4myk.onrender.com/ws';
+const API_URL = import.meta.env.VITE_RENDER_URL || 'https://portfolio-4myk.onrender.com';
 
 const BOOT_SEQUENCE = [
   { text: '[BIOS] Initializing hardware...', delay: 0 },
