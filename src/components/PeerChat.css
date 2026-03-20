@@ -1,0 +1,203 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   PeerChat — fixed bottom-right chat panel for multiplayer sessions
+   z-index 20: above terminal content, below full-screen overlays (z:9999)
+───────────────────────────────────────────────────────────────────────────── */
+
+.peer-chat {
+  position: fixed;
+  bottom: 3.5rem;
+  right: 1rem;
+  width: min(20rem, calc(100vw - 2rem));
+  z-index: 20;
+  font-family: 'JetBrains Mono', 'Fira Mono', monospace;
+  font-size: 0.72rem;
+  background: var(--term-bg, #0a0a0a);
+  border: 1px solid var(--term-btn-border, #00ff9944);
+  box-shadow: 0 0 12px #00ff9922;
+  border-radius: 2px;
+}
+
+/* ── Header ───────────────────────────────────────────────────────────────── */
+
+.peer-chat__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.35rem 0.6rem;
+  background: var(--term-btn-border, #00ff9922);
+  cursor: pointer;
+  user-select: none;
+  color: var(--term-success, #00ff99);
+  letter-spacing: 0.06em;
+}
+
+.peer-chat__title {
+  font-weight: 700;
+  font-size: 0.68rem;
+  opacity: 0.9;
+}
+
+.peer-chat__controls {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.peer-chat__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 50%;
+  background: var(--term-warning, #ffcc00);
+  color: #000;
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 0 0.2rem;
+}
+
+.peer-chat__toggle {
+  font-size: 0.6rem;
+  opacity: 0.7;
+}
+
+.peer-chat__status {
+  font-size: 0.6rem;
+  letter-spacing: 0.04em;
+}
+
+.peer-chat__status--ok {
+  color: var(--term-success, #00ff99);
+}
+
+.peer-chat__status--err {
+  color: #ff4444;
+}
+
+/* ── Messages ─────────────────────────────────────────────────────────────── */
+
+.peer-chat__messages {
+  max-height: 14rem;
+  overflow-y: auto;
+  padding: 0.5rem 0.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  scrollbar-width: none;
+}
+
+.peer-chat__messages::-webkit-scrollbar {
+  display: none;
+}
+
+.peer-chat__empty {
+  color: var(--term-system, #888);
+  font-style: italic;
+  font-size: 0.68rem;
+  text-align: center;
+  padding: 0.5rem 0;
+}
+
+.peer-chat__msg {
+  display: flex;
+  flex-direction: column;
+  gap: 0.05rem;
+}
+
+.peer-chat__msg--me {
+  align-items: flex-end;
+}
+
+.peer-chat__msg--peer {
+  align-items: flex-start;
+}
+
+.peer-chat__msg-label {
+  font-size: 0.6rem;
+  opacity: 0.5;
+  color: var(--term-system, #888);
+}
+
+.peer-chat__msg--me .peer-chat__msg-text {
+  color: var(--term-success, #00ff99);
+  background: #00ff9912;
+  padding: 0.2rem 0.45rem;
+  border-radius: 2px;
+  max-width: 90%;
+  word-break: break-word;
+  text-align: right;
+}
+
+.peer-chat__msg--peer .peer-chat__msg-text {
+  color: var(--term-warning, #ffcc00);
+  background: #ffcc0012;
+  padding: 0.2rem 0.45rem;
+  border-radius: 2px;
+  max-width: 90%;
+  word-break: break-word;
+}
+
+/* ── Input row ────────────────────────────────────────────────────────────── */
+
+.peer-chat__input-row {
+  display: flex;
+  border-top: 1px solid var(--term-btn-border, #00ff9922);
+  padding: 0.3rem 0.5rem;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.peer-chat__input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--term-text, #e0e0e0);
+  font-family: inherit;
+  font-size: 0.72rem;
+  caret-color: var(--term-success, #00ff99);
+}
+
+.peer-chat__input::placeholder {
+  color: var(--term-system, #555);
+}
+
+.peer-chat__send {
+  background: transparent;
+  border: 1px solid var(--term-btn-border, #00ff9944);
+  color: var(--term-success, #00ff99);
+  font-family: inherit;
+  font-size: 0.7rem;
+  padding: 0.15rem 0.4rem;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: background 0.15s;
+}
+
+.peer-chat__send:hover {
+  background: #00ff9920;
+}
+
+.peer-chat__error {
+  font-size: 0.65rem;
+  color: var(--term-warning, #ffcc00);
+  padding: 0.2rem 0.5rem 0.3rem;
+  border-top: 1px solid var(--term-btn-border, #00ff9922);
+}
+
+/* ── Collapsed state ──────────────────────────────────────────────────────── */
+
+.peer-chat--collapsed {
+  /* Only the header is visible */
+}
+
+/* ── Mobile ───────────────────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .peer-chat {
+    bottom: 4rem;
+    right: 0.5rem;
+    width: calc(100vw - 1rem);
+  }
+}

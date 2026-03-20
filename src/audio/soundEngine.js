@@ -72,7 +72,7 @@ const soundEngine = {
     if (!enabled()) return;
     switch (name) {
       case 'keystroke':
-        playNoise(0.007, 0.06, 1200);
+        playNoise(0.007, 0.06, 5000);
         break;
       case 'submit':
         playTone(523, 0.07, 'sine', 0.5);

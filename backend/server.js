@@ -75,7 +75,7 @@ app.post('/hire', async (req, res) => {
           'Content-Type':  'application/json',
         },
         body: JSON.stringify({
-          from:    'terminal@randip-leon.dev',
+          from:    'terminal@resend.dev',
           to:      'leonrandip@gmail.com',
           subject: `\u{1F5A5}\uFE0F Terminal transmission from ${org}`,
           text:    emailText,
@@ -168,6 +168,14 @@ wss.on('connection', (ws, req) => {
     if (payload.type === 'room_command') {
       const { roomId, command } = payload;
       broadcast(roomId, { type: 'peer_command', command }, ws);
+      return;
+    }
+
+    // ── Multiplayer: broadcast chat message to peer ───────────────────────────
+    if (payload.type === 'room_chat') {
+      const { roomId, text } = payload;
+      if (!text || typeof text !== 'string' || !text.trim()) return;
+      broadcast(roomId, { type: 'peer_chat', text: text.slice(0, 500) }, ws);
       return;
     }
 

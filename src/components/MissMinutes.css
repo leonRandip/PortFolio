@@ -8,36 +8,32 @@
   z-index: 50;
   pointer-events: auto;
   user-select: none;
-  /* smooth position drift between appearances */
-  transition: top 0.9s cubic-bezier(0.34, 1.56, 0.64, 1),
-              left 0.9s cubic-bezier(0.34, 1.56, 0.64, 1),
-              opacity 0.4s ease;
+  /* transition is set inline — speed varies between walk and teleport */
 }
 
 /* ── Avatar ───────────────────────────────────────────────────────────────── */
 
 .miss-minutes-avatar {
-  font-size: 2rem;
-  line-height: 1;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 2.6rem;
-  height: 2.6rem;
+  /* Large enough for the 3D model to look crisp */
+  width: 90px;
+  height: 90px;
   border-radius: 50%;
-  background: rgba(255, 107, 0, 0.1);
-  border: 1px solid rgba(255, 107, 0, 0.3);
-  box-shadow: 0 0 10px rgba(255, 107, 0, 0.2);
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  /* Float when idle; overridden by walk-left / walk-right when moving */
   animation: mm-float 3.2s ease-in-out infinite;
-  transition: box-shadow 0.2s ease, transform 0.2s ease;
   position: relative;
+  /* Clip the canvas to the circle */
+  overflow: hidden;
 }
 
 .miss-minutes-avatar:hover {
-  box-shadow: 0 0 20px rgba(255, 107, 0, 0.55),
-              0 0 40px rgba(255, 107, 0, 0.2);
-  animation: mm-float 3.2s ease-in-out infinite, mm-wiggle 0.4s ease forwards;
+  box-shadow: none;
 }
 
 /* ── Speech bubble ────────────────────────────────────────────────────────── */
@@ -135,21 +131,30 @@
 
 /* ── Keyframe animations ─────────────────────────────────────────────────── */
 
-/* Gentle vertical float — always applied to avatar */
+/* Gentle vertical float — idle state */
 @keyframes mm-float {
   0%   { transform: translateY(0px); }
   50%  { transform: translateY(-7px); }
   100% { transform: translateY(0px); }
 }
 
-/* Wiggle on hover */
-@keyframes mm-wiggle {
-  0%   { transform: translateY(0) rotate(0deg); }
-  20%  { transform: translateY(-2px) rotate(-10deg); }
-  40%  { transform: translateY(-2px) rotate(10deg); }
-  60%  { transform: translateY(0) rotate(-6deg); }
-  80%  { transform: translateY(0) rotate(4deg); }
-  100% { transform: translateY(0) rotate(0deg); }
+/* Waddle — rocks side to side with a little bounce, like waddling */
+@keyframes mm-waddle {
+  0%   { transform: rotate(-7deg) translateY(0px); }
+  25%  { transform: rotate(0deg)  translateY(-5px); }
+  50%  { transform: rotate(7deg)  translateY(0px); }
+  75%  { transform: rotate(0deg)  translateY(-5px); }
+  100% { transform: rotate(-7deg) translateY(0px); }
+}
+
+/* Walking RIGHT: waddle forward */
+.miss-minutes-avatar.walking.walk-right {
+  animation: mm-waddle 0.52s ease-in-out infinite;
+}
+
+/* Walking LEFT: reverse waddle */
+.miss-minutes-avatar.walking.walk-left {
+  animation: mm-waddle 0.52s ease-in-out infinite reverse;
 }
 
 /* Entrance fade for the whole component */
@@ -166,9 +171,8 @@
 
 @media (max-width: 768px) {
   .miss-minutes-avatar {
-    font-size: 1.6rem;
-    width: 2.1rem;
-    height: 2.1rem;
+    width: 68px;
+    height: 68px;
   }
 
   .miss-minutes-bubble {

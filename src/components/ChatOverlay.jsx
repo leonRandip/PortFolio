@@ -157,7 +157,7 @@ export default function ChatOverlay({ onClose, mode = 'jarvis' }) {
   const statusText  = wsStatus === 'open' ? cfg.statusReady : wsStatus === 'error' ? 'connection failed' : 'connecting...';
 
   return (
-    <div style={overlay} onClick={() => inputRef.current?.focus()}>
+    <div style={overlay} onClick={e => { e.stopPropagation(); inputRef.current?.focus(); }}>
       {/* ── Header ─────────────────────────────────────────────────────── */}
       <div style={{ color: cfg.accent, marginBottom: '0.4rem', letterSpacing: '0.06em', flexShrink: 0 }}>
         {cfg.header}

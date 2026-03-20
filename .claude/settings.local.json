@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "WebFetch(domain:www.npmjs.com)",
-      "Bash(npm info:*)"
+      "Bash(npm info:*)",
+      "Bash(npx playwright:*)",
+      "Bash(npm install:*)"
     ]
   },
   "enabledPlugins": {

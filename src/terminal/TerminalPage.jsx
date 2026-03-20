@@ -9,6 +9,7 @@ import TopProcess from '../components/TopProcess';
 import BrickBreaker from '../components/BrickBreaker';
 import ChatOverlay from '../components/ChatOverlay';
 import MissMinutes from '../components/MissMinutes';
+import PeerChat from '../components/PeerChat';
 import soundEngine from '../audio/soundEngine';
 import { useTheme } from '../themes/useTheme';
 
@@ -57,6 +58,8 @@ export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
   const [lastCommand, setLastCommand]           = useState('');
   const [commandCounter, setCommandCounter]     = useState(0);
   const [multiplayerMode, setMultiplayerMode]   = useState(null); // null | { roomId, role }
+  const [chatMessages, setChatMessages]         = useState([]);   // { from: 'me'|'peer', text }[]
+  const [unreadChat, setUnreadChat]             = useState(0);
   const [cmdHistory, setCmdHistory]             = useState([]);
   const [historyIndex, setHistoryIndex]         = useState(-1);
 
@@ -196,12 +199,17 @@ export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
       } else if (payload.type === 'peer_joined') {
         addLine(`[NET] ${payload.label ?? 'visitor2@randip'} has joined the session.`, 'success');
         soundEngine.play('peer-join');
-      } else if (payload.type === 'peer_command') {
-        const peerLabel = role === 'host' ? 'visitor2@randip' : 'visitor1@randip';
-        addLine(`${peerLabel}:~$ ${payload.command}`, 'user');
+      } else if (payload.type === 'peer_chat') {
+        setChatMessages(prev => {
+          const next = [...prev, { from: 'peer', text: payload.text }];
+          return next.length > 100 ? next.slice(-100) : next;
+        });
+        setUnreadChat(prev => prev + 1);
       } else if (payload.type === 'peer_left') {
         addLine('[NET] The other visitor has left the session.', 'warning');
         setMultiplayerMode(null);
+        setChatMessages([]);
+        setUnreadChat(0);
         soundEngine.play('disconnect');
         ws.close();
         mpWsRef.current = null;
@@ -243,9 +251,18 @@ export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
       mpWsRef.current = null;
     }
     setMultiplayerMode(null);
+    setChatMessages([]);
+    setUnreadChat(0);
     addLine('[NET] Session ended.', 'system');
     soundEngine.play('disconnect');
   }, [addLine, multiplayerMode]);
+
+  const onChatSend = useCallback((text) => {
+    setChatMessages(prev => {
+      const next = [...prev, { from: 'me', text }];
+      return next.length > 100 ? next.slice(-100) : next;
+    });
+  }, []);
 
   // Cleanup multiplayer WS on unmount
   useEffect(() => {
@@ -273,15 +290,6 @@ export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
     if (raw) {
       setCmdHistory(prev => [raw, ...prev]);
       setHistoryIndex(-1);
-
-      // Broadcast to multiplayer peer
-      if (mpWsRef.current?.readyState === 1 && multiplayerMode) {
-        mpWsRef.current.send(JSON.stringify({
-          type: 'room_command',
-          roomId: multiplayerMode.roomId,
-          command: raw,
-        }));
-      }
 
       const { command, args } = parseCommand(raw, commands);
       const handler = commands[command];
@@ -323,7 +331,7 @@ export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
     setSelectionEnd(0);
     setHistoryIndex(-1);
   }, [inputValue, addLine, addLink, clearOutput, onLaunch, onLegacy, promptLabel,
-      switchTheme, multiplayerMode, onSessionStart, onSessionJoin, onSessionEnd,
+      switchTheme, onSessionStart, onSessionJoin, onSessionEnd,
       setLastCommand, setCommandCounter]);
 
   // ── Keyboard handling ──────────────────────────────────────────────────────
@@ -490,6 +498,19 @@ export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
         }}>
           ● SESSION {multiplayerMode.roomId} [{multiplayerMode.role}]
         </div>
+      )}
+
+      {/* Peer chat panel — visible during active multiplayer session */}
+      {multiplayerMode && (
+        <PeerChat
+          wsRef={mpWsRef}
+          roomId={multiplayerMode.roomId}
+          role={multiplayerMode.role}
+          messages={chatMessages}
+          onSend={onChatSend}
+          unread={unreadChat}
+          onOpen={() => setUnreadChat(0)}
+        />
       )}
 
       {/* Matrix overlay */}

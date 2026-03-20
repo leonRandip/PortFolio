@@ -173,6 +173,7 @@ export const commands = {
       '  │  session start              Start a multiplayer session         │',
       '  │  session join <code>        Join a multiplayer session          │',
       '  │  session end                End current session                 │',
+      '  │  [chat panel appears bottom-right during active sessions]       │',
       '  ├─────────────────────────────────────────────────────────────────┤',
       '  │  clear                      Clear terminal                      │',
       '  │  help                       Show this message                   │',
