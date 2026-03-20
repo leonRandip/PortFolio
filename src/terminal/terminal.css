@@ -3,17 +3,33 @@
    Font is loaded in index.html (JetBrains Mono via Google Fonts)
 ────────────────────────────────────────────────────────── */
 
+/* ── CSS custom properties (overridden by JS for theme switching) ── */
+:root {
+  --term-bg:           #000000;
+  --term-fg:           #00ff41;
+  --term-error:        #ff4444;
+  --term-warning:      #ffb800;
+  --term-dim:          rgba(0,255,65,0.35);
+  --term-success-glow: rgba(0,255,65,0.35);
+  --term-cursor-glow:  rgba(0,255,65,0.55);
+  --term-select-bg:    #00ff41;
+  --term-select-color: #000d00;
+  --term-btn-border:   rgba(0,255,65,0.35);
+  --term-btn-bg:       rgba(0,255,65,0.07);
+}
+
 .terminal-container {
   position: fixed;
   inset: 0;
-  background: #000000;
+  background: var(--term-bg);
   font-family: 'JetBrains Mono', 'Courier New', monospace;
-  color: #00ff41;
+  color: var(--term-fg);
   display: flex;
   flex-direction: column;
   padding: 1.5rem 2rem 1.25rem;
   cursor: text;
   overflow: hidden;
+  transition: background 0.4s ease, color 0.4s ease;
 }
 
 /* Subtle scanline overlay for CRT feel */
@@ -56,11 +72,11 @@
 }
 
 /* Output type colours */
-.terminal-system  { color: #00ff41; }
+.terminal-system  { color: var(--term-fg); }
 .terminal-user    { color: #ffffff; }
-.terminal-error   { color: #ff4444; }
-.terminal-success { color: #00ff41; text-shadow: 0 0 8px rgba(0, 255, 65, 0.35); }
-.terminal-warning { color: #ffb800; }
+.terminal-error   { color: var(--term-error); }
+.terminal-success { color: var(--term-fg); text-shadow: 0 0 8px var(--term-success-glow); }
+.terminal-warning { color: var(--term-warning); }
 
 /* ── Input row ───────────────────────────────────────────── */
 
@@ -75,11 +91,11 @@
 }
 
 .terminal-prompt {
-  color: #00ff41;
+  color: var(--term-fg);
   font-size: 0.82rem;
   white-space: nowrap;
   letter-spacing: 0.025em;
-  text-shadow: 0 0 8px rgba(0, 255, 65, 0.25);
+  text-shadow: 0 0 8px var(--term-dim);
   flex-shrink: 0;
 }
 
@@ -95,10 +111,10 @@
   display: inline-block;
   width: 0.48rem;
   height: 0.95rem;
-  background: #00ff41;
+  background: var(--term-fg);
   animation: terminalBlink 1s step-end infinite;
   vertical-align: text-bottom;
-  box-shadow: 0 0 6px rgba(0, 255, 65, 0.55);
+  box-shadow: 0 0 6px var(--term-cursor-glow);
   flex-shrink: 0;
 }
 
@@ -129,8 +145,8 @@
 /* ── Selection highlight ─────────────────────────────────── */
 
 .terminal-selected-text {
-  background: #00ff41;
-  color: #000d00;
+  background: var(--term-select-bg);
+  color: var(--term-select-color);
   font-size: 0.82rem;
   letter-spacing: 0.025em;
   white-space: pre;
@@ -139,7 +155,7 @@
 /* ── Autocomplete ghost text ─────────────────────────────── */
 
 .terminal-ghost-text {
-  color: rgba(0, 255, 65, 0.35);
+  color: var(--term-dim);
   font-size: 0.82rem;
   letter-spacing: 0.025em;
   white-space: pre;
@@ -210,10 +226,10 @@
     flex-shrink: 0;
     width: 1.9rem;
     height: 1.9rem;
-    border: 1px solid rgba(0, 255, 65, 0.35);
+    border: 1px solid var(--term-btn-border);
     border-radius: 4px;
-    background: rgba(0, 255, 65, 0.07);
-    color: #00ff41;
+    background: var(--term-btn-bg);
+    color: var(--term-fg);
     cursor: pointer;
     padding: 0;
     /* keep above scanlines */
@@ -222,6 +238,6 @@
   }
 
   .terminal-send-btn:active {
-    background: rgba(0, 255, 65, 0.2);
+    background: var(--term-dim);
   }
 }

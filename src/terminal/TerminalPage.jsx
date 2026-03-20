@@ -8,6 +8,11 @@ import HackSequence from '../components/HackSequence';
 import TopProcess from '../components/TopProcess';
 import BrickBreaker from '../components/BrickBreaker';
 import ChatOverlay from '../components/ChatOverlay';
+import soundEngine from '../audio/soundEngine';
+import { useTheme } from '../themes/useTheme';
+
+const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:3001/ws';
+const API_URL = import.meta.env.VITE_RENDER_URL || 'http://localhost:3001';
 
 const BOOT_SEQUENCE = [
   { text: '[BIOS] Initializing hardware...', delay: 0 },
@@ -35,26 +40,36 @@ let lineIdCounter = 0;
 const makeId = () => ++lineIdCounter;
 
 export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
-  const [outputLines, setOutputLines] = useState([]);
-  const [inputValue, setInputValue] = useState('');
-  const [cursorPos, setCursorPos] = useState(0);
-  const [selectionEnd, setSelectionEnd] = useState(0);
-  const [isBooting, setIsBooting] = useState(true);
-  const [isMatrixActive, setIsMatrixActive] = useState(false);
-  const [isBashrcActive, setIsBashrcActive] = useState(false);
-  const [isHackActive, setIsHackActive] = useState(false);
-  const [isTopActive, setIsTopActive] = useState(false);
+  const [outputLines, setOutputLines]           = useState([]);
+  const [inputValue, setInputValue]             = useState('');
+  const [cursorPos, setCursorPos]               = useState(0);
+  const [selectionEnd, setSelectionEnd]         = useState(0);
+  const [isBooting, setIsBooting]               = useState(true);
+  const [isMatrixActive, setIsMatrixActive]     = useState(false);
+  const [isBashrcActive, setIsBashrcActive]     = useState(false);
+  const [isHackActive, setIsHackActive]         = useState(false);
+  const [isTopActive, setIsTopActive]           = useState(false);
   const [isBrickBreakerActive, setIsBrickBreakerActive] = useState(false);
-  const [isChatActive, setIsChatActive] = useState(false);
-  const [isGordonActive, setIsGordonActive] = useState(false);
-  const [cmdHistory, setCmdHistory] = useState([]);
-  const [historyIndex, setHistoryIndex] = useState(-1);
+  const [isChatActive, setIsChatActive]         = useState(false);
+  const [isGordonActive, setIsGordonActive]     = useState(false);
+  const [isMinutesActive, setIsMinutesActive]   = useState(false);
+  const [isHireActive, setIsHireActive]         = useState(false);
+  const [multiplayerMode, setMultiplayerMode]   = useState(null); // null | { roomId, role }
+  const [cmdHistory, setCmdHistory]             = useState([]);
+  const [historyIndex, setHistoryIndex]         = useState(-1);
 
-  const bottomRef      = useRef(null);
-  const inputRef       = useRef(null);
-  const containerRef   = useRef(null);
-  const skipRef        = useRef(false);
-  const bootDoneRef    = useRef(false);
+  // Theme hook — applies CSS vars to :root on mount and on switch
+  const [theme, switchTheme] = useTheme();
+
+  const bottomRef    = useRef(null);
+  const inputRef     = useRef(null);
+  const containerRef = useRef(null);
+  const skipRef      = useRef(false);
+  const bootDoneRef  = useRef(false);
+  const mpWsRef      = useRef(null); // multiplayer WebSocket
+
+  // Dynamic prompt label (changes with TVA theme)
+  const promptLabel = theme === 'tva' ? 'tva-agent@sacred-timeline:~$' : 'visitor@randip:~$';
 
   // Read cursor + selection from the hidden input (after browser processes the event)
   const syncCursor = useCallback(() => {
@@ -68,6 +83,7 @@ export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
 
   const addLine = useCallback((text, type = 'system') => {
     setOutputLines(prev => [...prev, { text, type, id: makeId() }]);
+    if (type === 'error') soundEngine.play('error');
   }, []);
 
   const addLink = useCallback((text, href, download) => {
@@ -123,10 +139,13 @@ export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
 
   // ── Restore terminal focus whenever any overlay closes ─────────────────────
   useEffect(() => {
-    if (!isChatActive && !isGordonActive && !isHackActive && !isTopActive && !isBrickBreakerActive && !isMatrixActive) {
+    if (
+      !isChatActive && !isGordonActive && !isMinutesActive &&
+      !isHackActive && !isTopActive && !isBrickBreakerActive && !isMatrixActive
+    ) {
       setTimeout(() => inputRef.current?.focus(), 60);
     }
-  }, [isChatActive, isGordonActive, isHackActive, isTopActive, isBrickBreakerActive, isMatrixActive]);
+  }, [isChatActive, isGordonActive, isMinutesActive, isHackActive, isTopActive, isBrickBreakerActive, isMatrixActive]);
 
   // ── Keyboard-aware resize (mobile) ────────────────────────────────────────
   useEffect(() => {
@@ -134,7 +153,6 @@ export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
     if (!vv) return;
     const update = () => {
       containerRef.current?.style.setProperty('--terminal-h', `${vv.height}px`);
-      // Scroll output to bottom so input stays visible when keyboard opens
       bottomRef.current?.scrollIntoView({ behavior: 'instant' });
     };
     vv.addEventListener('resize', update);
@@ -142,6 +160,98 @@ export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
     return () => {
       vv.removeEventListener('resize', update);
       vv.removeEventListener('scroll', update);
+    };
+  }, []);
+
+  // ── Multiplayer WebSocket helpers ──────────────────────────────────────────
+  const connectMultiplayer = useCallback((roomId, role) => {
+    // Close any existing connection first
+    if (mpWsRef.current) {
+      mpWsRef.current.close();
+      mpWsRef.current = null;
+    }
+
+    const ws = new WebSocket(WS_URL);
+    mpWsRef.current = ws;
+
+    ws.onopen = () => {
+      ws.send(JSON.stringify(
+        role === 'host'
+          ? { type: 'room_host', roomId }
+          : { type: 'room_join', roomId }
+      ));
+    };
+
+    ws.onmessage = (event) => {
+      let payload;
+      try { payload = JSON.parse(event.data); } catch { return; }
+
+      if (payload.type === 'room_ready') {
+        addLine(`[NET] Room ${roomId} active. Waiting for guest...`, 'success');
+        addLine(`[NET] Share this code: ${roomId}`, 'success');
+        addLine('[NET] Session expires in 30 min of inactivity.', 'system');
+        soundEngine.play('connect');
+      } else if (payload.type === 'room_joined') {
+        addLine(`[NET] Connected to session ${roomId}.`, 'success');
+        soundEngine.play('connect');
+      } else if (payload.type === 'peer_joined') {
+        addLine(`[NET] ${payload.label ?? 'visitor2@randip'} has joined the session.`, 'success');
+        soundEngine.play('peer-join');
+      } else if (payload.type === 'peer_command') {
+        const peerLabel = role === 'host' ? 'visitor2@randip' : 'visitor1@randip';
+        addLine(`${peerLabel}:~$ ${payload.command}`, 'user');
+      } else if (payload.type === 'peer_left') {
+        addLine('[NET] The other visitor has left the session.', 'warning');
+        setMultiplayerMode(null);
+        soundEngine.play('disconnect');
+        ws.close();
+        mpWsRef.current = null;
+      } else if (payload.type === 'error') {
+        addLine(`[ERR] ${payload.message}`, 'error');
+      }
+    };
+
+    ws.onerror = () => {
+      addLine('[ERR] Multiplayer connection failed.', 'error');
+    };
+
+    ws.onclose = () => {
+      mpWsRef.current = null;
+    };
+  }, [addLine]);
+
+  const onSessionStart = useCallback(async () => {
+    try {
+      const res = await fetch(`${API_URL}/rooms`, { method: 'POST' });
+      if (!res.ok) throw new Error('Server error');
+      const { roomId } = await res.json();
+      setMultiplayerMode({ roomId, role: 'host' });
+      connectMultiplayer(roomId, 'host');
+    } catch {
+      addLine('[ERR] Failed to create session. Is the server awake?', 'error');
+    }
+  }, [addLine, connectMultiplayer]);
+
+  const onSessionJoin = useCallback((code) => {
+    setMultiplayerMode({ roomId: code, role: 'guest' });
+    connectMultiplayer(code, 'guest');
+  }, [connectMultiplayer]);
+
+  const onSessionEnd = useCallback(() => {
+    if (mpWsRef.current && multiplayerMode) {
+      mpWsRef.current.send(JSON.stringify({ type: 'room_leave', roomId: multiplayerMode.roomId }));
+      mpWsRef.current.close();
+      mpWsRef.current = null;
+    }
+    setMultiplayerMode(null);
+    addLine('[NET] Session ended.', 'system');
+    soundEngine.play('disconnect');
+  }, [addLine, multiplayerMode]);
+
+  // Cleanup multiplayer WS on unmount
+  useEffect(() => {
+    return () => {
+      if (mpWsRef.current) mpWsRef.current.close();
     };
   }, []);
 
@@ -158,11 +268,21 @@ export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
   const handleSubmit = useCallback(() => {
     const raw = inputValue.trim();
 
-    addLine(`visitor@randip:~$ ${raw || ''}`, 'user');
+    soundEngine.play('submit');
+    addLine(`${promptLabel} ${raw || ''}`, 'user');
 
     if (raw) {
       setCmdHistory(prev => [raw, ...prev]);
       setHistoryIndex(-1);
+
+      // Broadcast to multiplayer peer
+      if (mpWsRef.current?.readyState === 1 && multiplayerMode) {
+        mpWsRef.current.send(JSON.stringify({
+          type: 'room_command',
+          roomId: multiplayerMode.roomId,
+          command: raw,
+        }));
+      }
 
       const { command, args } = parseCommand(raw, commands);
       const handler = commands[command];
@@ -174,13 +294,20 @@ export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
           addLink,
           clearOutput,
           onLaunch,
-          onMatrix: () => setIsMatrixActive(true),
-          onBashrc: () => setIsBashrcActive(true),
-          onHack: () => setIsHackActive(true),
-          onTop: () => setIsTopActive(true),
+          onMatrix:       () => setIsMatrixActive(true),
+          onBashrc:       () => setIsBashrcActive(true),
+          onHack:         () => setIsHackActive(true),
+          onTop:          () => setIsTopActive(true),
           onBrickBreaker: () => setIsBrickBreakerActive(true),
-          onChat: () => setIsChatActive(true),
-          onGordon: () => setIsGordonActive(true),
+          onChat:         () => setIsChatActive(true),
+          onGordon:       () => setIsGordonActive(true),
+          onMinutes:      () => setIsMinutesActive(true),
+          onHireLock:     () => setIsHireActive(true),
+          onHireUnlock:   () => setIsHireActive(false),
+          onTheme:        switchTheme,
+          onSessionStart,
+          onSessionJoin,
+          onSessionEnd,
           onLegacy,
         });
       } else {
@@ -193,11 +320,12 @@ export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
     setCursorPos(0);
     setSelectionEnd(0);
     setHistoryIndex(-1);
-  }, [inputValue, addLine, addLink, clearOutput, onLaunch, onLegacy]);
+  }, [inputValue, addLine, addLink, clearOutput, onLaunch, onLegacy, promptLabel,
+      switchTheme, multiplayerMode, onSessionStart, onSessionJoin, onSessionEnd]);
 
   // ── Keyboard handling ──────────────────────────────────────────────────────
   const handleKeyDown = useCallback((e) => {
-    if (isBooting || isHackActive || isTopActive || isBrickBreakerActive || isChatActive || isGordonActive) {
+    if (isBooting || isHireActive || isHackActive || isTopActive || isBrickBreakerActive || isChatActive || isGordonActive || isMinutesActive) {
       if (e.key === 'Enter' && isBooting) skipBoot_();
       return;
     }
@@ -235,9 +363,6 @@ export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
       suggestion &&
       window.matchMedia('(max-width: 768px)').matches
     ) {
-      // Mobile: space completes the autocomplete suggestion instead of adding a space.
-      // Only fires when ghost text is visible (suggestion !== ''), so typing
-      // arguments after a completed command (e.g. "cowsay hello") is unaffected.
       e.preventDefault();
       setInputValue(suggestion);
       setCursorPos(suggestion.length);
@@ -250,7 +375,12 @@ export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
     } else {
       syncCursor();
     }
-  }, [isBooting, isHackActive, isTopActive, isBrickBreakerActive, isChatActive, isGordonActive, historyIndex, cmdHistory, handleSubmit, skipBoot_, syncCursor, suggestion, cursorPos, inputValue.length]);
+  }, [
+    isBooting, isHireActive, isHackActive, isTopActive, isBrickBreakerActive,
+    isChatActive, isGordonActive, isMinutesActive,
+    historyIndex, cmdHistory, handleSubmit, skipBoot_, syncCursor,
+    suggestion, cursorPos, inputValue.length,
+  ]);
 
   return (
     <div
@@ -280,10 +410,10 @@ export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
         <div ref={bottomRef} />
       </div>
 
-      {/* Input row — only visible after boot */}
-      {!isBooting && (
+      {/* Input row — only visible after boot and while not hire-locked */}
+      {!isBooting && !isHireActive && (
         <div className="terminal-input-row">
-          <span className="terminal-prompt">visitor@randip:~$</span>
+          <span className="terminal-prompt">{promptLabel}</span>
 
           {/* Cursor / selection rendering */}
           {cursorPos === selectionEnd ? (
@@ -315,6 +445,7 @@ export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
               setInputValue(e.target.value);
               setCursorPos(e.target.selectionStart ?? e.target.value.length);
               setSelectionEnd(e.target.selectionEnd ?? e.target.value.length);
+              soundEngine.play('keystroke');
             }}
             onKeyDown={handleKeyDown}
             onKeyUp={syncCursor}
@@ -332,7 +463,7 @@ export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
             aria-label="Terminal input"
           />
 
-          {/* Send button — mobile only (hidden via CSS on desktop) */}
+          {/* Send button — mobile only */}
           <button
             className="terminal-send-btn"
             onPointerDown={e => { e.preventDefault(); handleSubmit(); inputRef.current?.focus(); }}
@@ -340,9 +471,21 @@ export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
             tabIndex={-1}
           >
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M1 7h12M7 1l6 6-6 6" stroke="#00ff41" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M1 7h12M7 1l6 6-6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </button>
+        </div>
+      )}
+
+      {/* Multiplayer session indicator */}
+      {multiplayerMode && (
+        <div style={{
+          position: 'absolute', top: '0.6rem', right: '1.5rem',
+          fontSize: '0.68rem', color: 'var(--term-warning)',
+          fontFamily: '"JetBrains Mono", monospace', zIndex: 10,
+          letterSpacing: '0.05em', opacity: 0.8,
+        }}>
+          ● SESSION {multiplayerMode.roomId} [{multiplayerMode.role}]
         </div>
       )}
 
@@ -385,6 +528,14 @@ export default function TerminalPage({ onLaunch, onLegacy, skipBoot }) {
         <ChatOverlay mode="gordon" onClose={(msg) => {
           setIsGordonActive(false);
           if (msg) addLine(msg, 'error');
+        }} />
+      )}
+
+      {/* Miss Minutes (TVA) */}
+      {isMinutesActive && (
+        <ChatOverlay mode="minutes" onClose={(msg) => {
+          setIsMinutesActive(false);
+          if (msg) addLine(msg, 'warning');
         }} />
       )}
 

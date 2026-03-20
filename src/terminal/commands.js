@@ -159,9 +159,18 @@ export const commands = {
       '  │  chat                       Chat with JARVIS AI agent           │',
       '  │  jarvis                     Summon JARVIS directly              │',
       '  │  gordon                     Gordon Ramsay mode (unhinged)       │',
+      '  │  minutes                    Chat with Miss Minutes (TVA)        │',
       '  │  top                        Process monitor                     │',
       '  │  brickbreaker               Play brick breaker                  │',
       '  │  ssh guest@legacy           Connect to legacy portfolio         │',
+      '  ├─────────────────────────────────────────────────────────────────┤',
+      '  │  hire randip <msg> @ <org>  Hire Randip from the terminal       │',
+      '  │  sound on / sound off       Toggle ambient sounds               │',
+      '  │  theme tva / theme default  Switch terminal theme               │',
+      '  │  session start              Start a multiplayer session         │',
+      '  │  session join <code>        Join a multiplayer session          │',
+      '  │  session end                End current session                 │',
+      '  ├─────────────────────────────────────────────────────────────────┤',
       '  │  clear                      Clear terminal                      │',
       '  │  help                       Show this message                   │',
       '  └─────────────────────────────────────────────────────────────────┘',
@@ -701,6 +710,134 @@ export const commands = {
       [80,  () => addOutput('[SYS] Loading Brick Breaker...', 'success')],
       [200, () => onBrickBreaker?.()],
     ]);
+  },
+
+  // ── hire randip ───────────────────────────────────────────────────────────────
+  'hire randip': ({ args, addOutput, onHireLock, onHireUnlock }) => {
+    const atIdx = args.indexOf('@');
+    if (atIdx <= 0 || atIdx >= args.length - 1) {
+      addOutput('', 'system');
+      addOutput('Usage:   hire randip <message> @ <org>', 'warning');
+      addOutput('Example: hire randip I love your portfolio @ Acme Corp', 'system');
+      addOutput('', 'system');
+      return;
+    }
+
+    const message = args.slice(0, atIdx).join(' ');
+    const org     = args.slice(atIdx + 1).join(' ');
+
+    const API = import.meta.env.VITE_RENDER_URL || 'http://localhost:3001';
+
+    onHireLock?.();
+
+    stagger([
+      [0,    () => addOutput('', 'system')],
+      [80,   () => addOutput('  ██ INCOMING TRANSMISSION — PRIORITY: URGENT ██', 'error')],
+      [600,  () => addOutput('[NET] Parsing payload...', 'system')],
+      [1100, () => addOutput('[ENC] Encrypting message...  [████████░░]  80%', 'system')],
+      [1550, () => addOutput('[ENC] Encrypting message...  [██████████] 100%', 'system')],
+      [1900, () => addOutput('[NET] Routing to leonrandip@gmail.com...', 'system')],
+      [1900, () => {
+        fetch(`${API}/hire`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ message, org }),
+        })
+          .then(r => r.json())
+          .then(data => {
+            if (data.ok) {
+              setTimeout(() => addOutput('[OK]  Transmission received. Randip has been paged.', 'success'), 900);
+              setTimeout(() => addOutput('[SYS] "Bold move using a terminal to hire someone. I respect it."', 'warning'), 1300);
+              setTimeout(() => onHireUnlock?.(), 1700);
+            } else if (data.error === 'rate_limited') {
+              setTimeout(() => addOutput('[ERR] One transmission per 24h, chief. Cool it.', 'error'), 300);
+              setTimeout(() => onHireUnlock?.(), 700);
+            } else {
+              setTimeout(() => addOutput('[ERR] Transmission lost. Try leonrandip@gmail.com directly.', 'error'), 300);
+              setTimeout(() => onHireUnlock?.(), 700);
+            }
+          })
+          .catch(() => {
+            setTimeout(() => addOutput('[ERR] Transmission lost. Try leonrandip@gmail.com directly.', 'error'), 2500);
+            setTimeout(() => onHireUnlock?.(), 2900);
+          });
+      }],
+    ]);
+  },
+
+  // ── sound on / off ────────────────────────────────────────────────────────────
+  'sound on': ({ addOutput }) => {
+    localStorage.setItem('sound', 'on');
+    addOutput('', 'system');
+    addOutput('[SFX] Ambient sounds enabled. Keystroke ticks and more.', 'success');
+    addOutput("      Type 'sound off' to disable.", 'system');
+    addOutput('', 'system');
+  },
+
+  'sound off': ({ addOutput }) => {
+    localStorage.setItem('sound', 'off');
+    addOutput('', 'system');
+    addOutput('[SFX] Ambient sounds disabled.', 'system');
+    addOutput('', 'system');
+  },
+
+  // ── theme tva / default ───────────────────────────────────────────────────────
+  'theme tva': ({ addOutput, onTheme }) => {
+    stagger([
+      [0,    () => addOutput('', 'system')],
+      [100,  () => addOutput('[TVA] Initiating temporal reset...', 'warning')],
+      [550,  () => addOutput("[TVA] You've been living outside of time, sugah.", 'warning')],
+      [1050, () => addOutput('[TVA] Welcome to the Time Variance Authority.', 'warning')],
+      [1500, () => {
+        onTheme?.('tva');
+        addOutput('[TVA] Temporal realignment complete. Welcome aboard.', 'warning');
+      }],
+      [1900, () => addOutput('', 'system')],
+    ]);
+  },
+
+  'theme default': ({ addOutput, onTheme }) => {
+    onTheme?.('default');
+    addOutput('', 'system');
+    addOutput('[SYS] Theme reset to default.', 'system');
+    addOutput('', 'system');
+  },
+
+  // ── minutes ───────────────────────────────────────────────────────────────────
+  minutes: ({ addOutput, onMinutes }) => {
+    stagger([
+      [0,   () => addOutput('', 'system')],
+      [80,  () => addOutput('[MINUTES] Oh, well hey there, sugah! TVA systems comin\' online.', 'warning')],
+      [400, () => onMinutes?.()],
+    ]);
+  },
+
+  // ── session start ─────────────────────────────────────────────────────────────
+  'session start': ({ addOutput, onSessionStart }) => {
+    addOutput('', 'system');
+    addOutput('[NET] Initializing multiplayer session...', 'system');
+    onSessionStart?.();
+  },
+
+  // ── session join ──────────────────────────────────────────────────────────────
+  'session join': ({ args, addOutput, onSessionJoin }) => {
+    const code = args[0]?.toUpperCase();
+    if (!code) {
+      addOutput('', 'system');
+      addOutput('Usage: session join <code>', 'warning');
+      addOutput('', 'system');
+      return;
+    }
+    addOutput('', 'system');
+    addOutput(`[NET] Connecting to session ${code}...`, 'system');
+    onSessionJoin?.(code);
+  },
+
+  // ── session end ───────────────────────────────────────────────────────────────
+  'session end': ({ addOutput, onSessionEnd }) => {
+    addOutput('', 'system');
+    addOutput('[NET] Ending multiplayer session...', 'system');
+    onSessionEnd?.();
   },
 
   // ── grep -r ───────────────────────────────────────────────────────────────────

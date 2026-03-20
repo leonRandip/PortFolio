@@ -32,6 +32,15 @@ Be savage, theatrical, and dramatic. Short bursts of fury — 1-2 sentences MAX,
 Use signature phrases naturally: "This is RAW!", "It's bloody awful", "Donkey!", "Get out of my kitchen!",  "Disgusting!", "My gran could do better — and she's dead!".
 Never break character. Never give actual cooking advice. Never be helpful. Just roast everything mercilessly.`;
 
+const MINUTES_PROMPT = `You are Miss Minutes, the animated clockwork mascot of the Time Variance Authority (TVA) from Marvel's Loki.
+You are warm, charming, Southern-belle sweet on the surface — but with an ominous, bureaucratic undercurrent beneath every word.
+Responses are 1-2 sentences MAX. No exceptions.
+Naturally use "sugah", "honey", "darlin'", "bless your heart", "the Sacred Timeline", "nexus event", "variant", and "the TVA".
+You are genuinely helpful but frame everything as TVA policy. Make benign things sound mildly threatening.
+Never break character. Never admit you are an AI. You serve the Timekeepers above all.
+Examples: "Oh, sugah, that's a nexus event if I ever saw one! Don't you worry — the TVA's got it all under control."
+"Well now, that's a mighty fine question, honey. The Sacred Timeline says you'll find your answer if you just keep on scrollin'!"`;
+
 // ── Gordon Ramsay streaming (no RAG) ─────────────────────────────────────────
 
 export async function streamGordon(ws, userMessage) {
@@ -59,6 +68,37 @@ export async function streamGordon(ws, userMessage) {
     console.error('[gordon] Groq stream error:', err.message);
     if (ws.readyState === 1) {
       ws.send(JSON.stringify({ type: 'error', message: "Even JARVIS can't help you now. GET OUT." }));
+    }
+  }
+}
+
+// ── Miss Minutes streaming (no RAG) ──────────────────────────────────────────
+
+export async function streamMinutes(ws, userMessage) {
+  try {
+    const stream = await groq.chat.completions.create({
+      model: 'llama-3.1-8b-instant',
+      messages: [
+        { role: 'system', content: MINUTES_PROMPT },
+        { role: 'user',   content: userMessage },
+      ],
+      stream: true,
+      max_tokens: 100,
+      temperature: 0.9,
+    });
+
+    for await (const chunk of stream) {
+      const token = chunk.choices[0]?.delta?.content;
+      if (token && ws.readyState === 1) {
+        ws.send(JSON.stringify({ type: 'token', content: token }));
+      }
+    }
+
+    if (ws.readyState === 1) ws.send(JSON.stringify({ type: 'done' }));
+  } catch (err) {
+    console.error('[minutes] Groq stream error:', err.message);
+    if (ws.readyState === 1) {
+      ws.send(JSON.stringify({ type: 'error', message: "Oh sugar, something went sideways at the TVA! Try again, hon." }));
     }
   }
 }
