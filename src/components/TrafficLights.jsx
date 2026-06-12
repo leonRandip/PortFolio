@@ -7,7 +7,7 @@ const DOTS = [
   { id: 'green',  color: '#28c840', symbol: '↑', label: 'Fullscreen' },
 ];
 
-export default function TrafficLights({ onClose, onMinimize, onFullscreen }) {
+export default function TrafficLights({ onClose, onMinimize, onFullscreen, zIndex = 40, visible = true }) {
   const [hovered, setHovered] = useState(null);
 
   const handlers = { red: onClose, yellow: onMinimize, green: onFullscreen };
@@ -18,12 +18,14 @@ export default function TrafficLights({ onClose, onMinimize, onFullscreen }) {
         position: 'fixed',
         top: '1rem',
         left: '1rem',
-        zIndex: 40,
+        zIndex,
+        opacity: visible ? 1 : 0,
+        pointerEvents: visible ? 'auto' : 'none',
+        transition: 'opacity 0.2s ease',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'flex-start',
         gap: 4,
-        pointerEvents: 'auto',
       }}
     >
       {/* Pill container */}

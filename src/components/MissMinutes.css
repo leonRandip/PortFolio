@@ -8,42 +8,71 @@
   z-index: 50;
   pointer-events: auto;
   user-select: none;
-  /* transition is set inline — speed varies between walk and teleport */
+  /* transition is set inline — speed varies between walk and fly */
+  animation: mm-enter 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
-/* ── Avatar ───────────────────────────────────────────────────────────────── */
+/* ── Avatar ─────────────────────────────────────────────────────────────── */
 
 .miss-minutes-avatar {
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  /* Large enough for the 3D model to look crisp */
-  width: 90px;
-  height: 90px;
-  border-radius: 50%;
+  width: 140px;
+  height: 140px;
   background: transparent;
   border: none;
   box-shadow: none;
-  /* Float when idle; overridden by walk-left / walk-right when moving */
-  animation: mm-float 3.2s ease-in-out infinite;
+  overflow: visible;   /* bloom glow bleeds outside the box */
   position: relative;
-  /* Clip the canvas to the circle */
-  overflow: hidden;
+  /* Float when idle */
+  animation: mm-float 3.2s ease-in-out infinite;
 }
 
-.miss-minutes-avatar:hover {
-  box-shadow: none;
+/* ── Walk — GIF handles motion, pause the float animation ───────────────── */
+
+.miss-minutes-avatar.walking {
+  animation: none;
 }
 
-/* ── Speech bubble ────────────────────────────────────────────────────────── */
+/* ── Fly animation ───────────────────────────────────────────────────────── */
+
+@keyframes mm-fly {
+  0%   { transform: rotate(-4deg) translateY(0px)   scale(1.0); }
+  20%  { transform: rotate(6deg)  translateY(-14px) scale(1.05); }
+  50%  { transform: rotate(-3deg) translateY(-8px)  scale(1.03); }
+  75%  { transform: rotate(5deg)  translateY(-16px) scale(1.05); }
+  100% { transform: rotate(-4deg) translateY(0px)   scale(1.0); }
+}
+
+.miss-minutes-avatar.flying {
+  animation: mm-fly 2.2s ease-in-out infinite;
+}
+
+/* ── Idle float ──────────────────────────────────────────────────────────── */
+
+@keyframes mm-float {
+  0%   { transform: translateY(0px); }
+  50%  { transform: translateY(-8px); }
+  100% { transform: translateY(0px); }
+}
+
+/* ── Entrance ────────────────────────────────────────────────────────────── */
+
+@keyframes mm-enter {
+  from { opacity: 0; transform: scale(0.6); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* ── Speech bubble ───────────────────────────────────────────────────────── */
 
 .miss-minutes-bubble {
   position: absolute;
   left: 50%;
   transform: translateX(-50%) translateY(-4px);
   background: rgba(26, 10, 0, 0.94);
-  border: 1px solid rgba(255, 107, 0, 0.45);
+  border: 1px solid rgba(255, 107, 0, 0.5);
   border-radius: 8px;
   color: #FFB347;
   font-family: 'JetBrains Mono', 'Courier New', monospace;
@@ -54,7 +83,7 @@
   padding: 0.5rem 0.75rem;
   white-space: pre-wrap;
   pointer-events: none;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), 0 0 12px rgba(255, 107, 0, 0.15);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.6), 0 0 16px rgba(255,107,0,0.2);
 
   opacity: 0;
   transition: opacity 0.25s ease, transform 0.25s ease;
@@ -65,19 +94,19 @@
   transform: translateX(-50%) translateY(0);
 }
 
-/* Bubble placed ABOVE the avatar */
+/* Bubble above */
 .miss-minutes-bubble.above {
   bottom: calc(100% + 10px);
   top: auto;
 }
 
-/* Bubble placed BELOW the avatar */
+/* Bubble below */
 .miss-minutes-bubble.below {
   top: calc(100% + 10px);
   bottom: auto;
 }
 
-/* Triangle pointer — above (pointing down toward avatar) */
+/* Triangle pointer — above */
 .miss-minutes-bubble.above::after {
   content: '';
   position: absolute;
@@ -86,10 +115,10 @@
   transform: translateX(-50%);
   border-left: 6px solid transparent;
   border-right: 6px solid transparent;
-  border-top: 6px solid rgba(255, 107, 0, 0.45);
+  border-top: 6px solid rgba(255, 107, 0, 0.5);
 }
 
-/* Triangle pointer — below (pointing up toward avatar) */
+/* Triangle pointer — below */
 .miss-minutes-bubble.below::after {
   content: '';
   position: absolute;
@@ -98,81 +127,39 @@
   transform: translateX(-50%);
   border-left: 6px solid transparent;
   border-right: 6px solid transparent;
-  border-bottom: 6px solid rgba(255, 107, 0, 0.45);
+  border-bottom: 6px solid rgba(255, 107, 0, 0.5);
 }
 
-/* Bubble shifted left when avatar is near right edge */
+/* Shifted left (near right edge) */
 .miss-minutes-bubble.shift-left {
   left: auto;
   right: 0;
   transform: translateY(-4px);
 }
-.miss-minutes-bubble.shift-left.visible {
-  transform: translateY(0);
-}
+.miss-minutes-bubble.shift-left.visible  { transform: translateY(0); }
 .miss-minutes-bubble.shift-left::after,
 .miss-minutes-bubble.shift-left.above::after {
   left: auto;
   right: 1rem;
 }
 
-/* Bubble shifted right when avatar is near left edge */
+/* Shifted right (near left edge) */
 .miss-minutes-bubble.shift-right {
   left: 0;
   transform: translateY(-4px);
 }
-.miss-minutes-bubble.shift-right.visible {
-  transform: translateY(0);
-}
+.miss-minutes-bubble.shift-right.visible { transform: translateY(0); }
 .miss-minutes-bubble.shift-right::after,
 .miss-minutes-bubble.shift-right.above::after {
   left: 1rem;
 }
 
-/* ── Keyframe animations ─────────────────────────────────────────────────── */
-
-/* Gentle vertical float — idle state */
-@keyframes mm-float {
-  0%   { transform: translateY(0px); }
-  50%  { transform: translateY(-7px); }
-  100% { transform: translateY(0px); }
-}
-
-/* Waddle — rocks side to side with a little bounce, like waddling */
-@keyframes mm-waddle {
-  0%   { transform: rotate(-7deg) translateY(0px); }
-  25%  { transform: rotate(0deg)  translateY(-5px); }
-  50%  { transform: rotate(7deg)  translateY(0px); }
-  75%  { transform: rotate(0deg)  translateY(-5px); }
-  100% { transform: rotate(-7deg) translateY(0px); }
-}
-
-/* Walking RIGHT: waddle forward */
-.miss-minutes-avatar.walking.walk-right {
-  animation: mm-waddle 0.52s ease-in-out infinite;
-}
-
-/* Walking LEFT: reverse waddle */
-.miss-minutes-avatar.walking.walk-left {
-  animation: mm-waddle 0.52s ease-in-out infinite reverse;
-}
-
-/* Entrance fade for the whole component */
-@keyframes mm-enter {
-  from { opacity: 0; transform: scale(0.7); }
-  to   { opacity: 1; transform: scale(1); }
-}
-
-.miss-minutes {
-  animation: mm-enter 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-}
-
-/* ── Mobile ───────────────────────────────────────────────────────────────── */
+/* ── Mobile ──────────────────────────────────────────────────────────────── */
 
 @media (max-width: 768px) {
   .miss-minutes-avatar {
-    width: 68px;
-    height: 68px;
+    width: 100px;
+    height: 100px;
   }
 
   .miss-minutes-bubble {

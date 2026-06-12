@@ -61,11 +61,6 @@ export const COMMAND_REACTIONS = {
     "Revertin' to a previous timeline? That's... technically a nexus event, sugah.",
     "The Timekeepers are disappointed. But they'll reset you eventually.",
   ],
-  matrix: [
-    "Another simulated reality? The Sacred Timeline is the only one that matters, darlin'.",
-    "Variant timelines are so last reset, sugah.",
-    "Digital rain? We prefer good ol' TVA paperwork around here.",
-  ],
   open: [
     "Openin' up a project? The Timekeepers approve of productivity, sugah.",
     "A new window into the timeline! How excitin', darlin'.",
@@ -133,10 +128,6 @@ export const COMMAND_REACTIONS = {
   'sound off': [
     "Silence. The TVA operates in many modes, sugah.",
     "Quiet mode engaged. The Timekeepers appreciate discretion, darlin'.",
-  ],
-  whoami: [
-    "Why, you're a variant, sugah. A very interesting one.",
-    "Identity crisis? The TVA's got your file, darlin'. Very thick file.",
   ],
   'sudo init project-black': [
     "Launchin' the portfolio! The Sacred Timeline has been anticipatin' this, sugah.",

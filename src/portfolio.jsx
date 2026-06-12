@@ -74,42 +74,6 @@ export default function PortfolioClone({ onEject, isMobile }) {
       >
         <BackgroundBeams className="absolute inset-0 z-0 w-full h-full scale-[2] md:scale-100" />
         <div className="flex flex-col items-center justify-center w-full max-w-6xl md:flex-row gap-8 z-10">
-          {/* Social Icons - Right side for desktop */}
-          <div className="hidden md:flex flex-col items-center justify-center absolute right-80 top-1/2 -translate-y-1/2">
-            <div className="w-4 h-4 bg-white rounded-full mb-2"></div>
-            <div className="w-px h-16 bg-gradient-to-b from-white to-transparent"></div>
-            <div className="flex flex-col items-center gap-4 mt-4">
-              <a
-                href="https://github.com/leonRandip"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <div className="p-2 rounded-full hover:bg-white hover:text-black transition-colors">
-                  <Github className="w-5 h-5" />
-                </div>
-              </a>
-              <a
-                href="https://www.linkedin.com/in/leonrandip/"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <div className="p-2 rounded-full hover:bg-white hover:text-black transition-colors">
-                  <Linkedin className="w-5 h-5" />
-                </div>
-              </a>
-              <a
-                href="https://mail.google.com/mail/?view=cm&fs=1&to=leonrandip@gmail.com"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <div className="p-2 rounded-full hover:bg-white hover:text-black transition-colors">
-                  <Mail className="w-5 h-5" />
-                </div>
-              </a>
-            </div>
-            <div className="w-px h-40 bg-gradient-to-b from-white to-black mt-4"></div>
-          </div>
-
           {/* Social Icons - Below hero content on mobile */}
           <div className="flex md:hidden justify-center mt-4 mb-6 space-x-6">
             <a
@@ -157,6 +121,30 @@ export default function PortfolioClone({ onEject, isMobile }) {
               Design clean, responsive UI with a keen eye for user experience •
               Always exploring the latest in tech trends and development tools
             </p>
+          </div>
+
+          {/* Social Icons - Right side for desktop, part of flex row */}
+          <div className="hidden md:flex flex-col items-center flex-shrink-0 self-center">
+            <div className="w-3 h-3 bg-white rounded-full mb-2"></div>
+            <div className="w-px h-12 bg-gradient-to-b from-white to-transparent"></div>
+            <div className="flex flex-col items-center gap-4 mt-4">
+              <a href="https://github.com/leonRandip" target="_blank" rel="noopener noreferrer">
+                <div className="p-2 rounded-full hover:bg-white hover:text-black transition-colors">
+                  <Github className="w-5 h-5" />
+                </div>
+              </a>
+              <a href="https://www.linkedin.com/in/leonrandip/" target="_blank" rel="noopener noreferrer">
+                <div className="p-2 rounded-full hover:bg-white hover:text-black transition-colors">
+                  <Linkedin className="w-5 h-5" />
+                </div>
+              </a>
+              <a href="https://mail.google.com/mail/?view=cm&fs=1&to=leonrandip@gmail.com" target="_blank" rel="noopener noreferrer">
+                <div className="p-2 rounded-full hover:bg-white hover:text-black transition-colors">
+                  <Mail className="w-5 h-5" />
+                </div>
+              </a>
+            </div>
+            <div className="w-px h-32 bg-gradient-to-b from-white to-transparent mt-4"></div>
           </div>
         </div>
       </section>

@@ -6,9 +6,20 @@ import TerminalPage from './terminal/TerminalPage';
 import DeconstructOverlay from './components/DeconstructOverlay';
 import TrafficLights from './components/TrafficLights';
 import RetroPortfolio from './components/RetroPortfolio';
+import InterfacePicker from './components/InterfacePicker';
+import MacOSDesktop from './gui/MacOSDesktop';
+import IOSHome from './gui/IOSHome';
 
 // Determined once at module level — avoids render flicker from useEffect
 const IS_MOBILE = typeof window !== 'undefined' && window.innerWidth < 768;
+
+function getInitialView() {
+  const pref = localStorage.getItem('ui-mode');
+  if (!pref) return 'picker';
+  if (pref === 'terminal') return IS_MOBILE ? 'portfolio' : 'terminal';
+  if (pref === 'gui')      return IS_MOBILE ? 'ios' : 'macos';
+  return 'picker';
+}
 
 export default function App() {
   // Wake up the Render backend so it's warm before the user types 'chat'
@@ -18,7 +29,7 @@ export default function App() {
     }
   }, []);
 
-  const [view, setView] = useState(IS_MOBILE ? 'portfolio' : 'terminal');
+  const [view, setView] = useState(getInitialView);
   const [skipBoot, setSkipBoot] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [showConnectionClosed, setShowConnectionClosed] = useState(false);
@@ -36,6 +47,17 @@ export default function App() {
   }, [view]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── View transition handlers ───────────────────────────────────────────────
+
+  const handlePick = (mode) => {
+    if (mode === 'terminal') setView(IS_MOBILE ? 'portfolio' : 'terminal');
+    else                     setView(IS_MOBILE ? 'ios' : 'macos');
+  };
+
+  const handleSwitchInterface = () => {
+    if (document.fullscreenElement) document.exitFullscreen?.().catch(() => {});
+    localStorage.removeItem('ui-mode');
+    setView('picker');
+  };
 
   const handleLaunch = () => {
     if (isTransitioning.current) return;
@@ -96,6 +118,45 @@ export default function App() {
   return (
     <div style={{ position: 'fixed', inset: 0, background: '#000' }}>
       <AnimatePresence mode="wait">
+
+        {view === 'picker' && (
+          <motion.div
+            key="picker"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0, scale: 0.97 }}
+            transition={{ duration: 0.35 }}
+            style={{ position: 'absolute', inset: 0 }}
+          >
+            <InterfacePicker onPick={handlePick} />
+          </motion.div>
+        )}
+
+        {view === 'macos' && (
+          <motion.div
+            key="macos"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4 }}
+            style={{ position: 'absolute', inset: 0 }}
+          >
+            <MacOSDesktop onSwitchInterface={handleSwitchInterface} />
+          </motion.div>
+        )}
+
+        {view === 'ios' && (
+          <motion.div
+            key="ios"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4 }}
+            style={{ position: 'absolute', inset: 0 }}
+          >
+            <IOSHome onSwitchInterface={handleSwitchInterface} />
+          </motion.div>
+        )}
 
         {view === 'terminal' && (
           <motion.div

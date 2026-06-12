@@ -1,0 +1,217 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   iOS Home Screen GUI
+───────────────────────────────────────────────────────────────────────────── */
+
+.ios-root {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Rounded', 'SF Pro Text', sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Wallpaper ─────────────────────────────────────────────────────────────── */
+
+.ios-wallpaper {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse at 25% 30%, rgba(60, 30, 100, 0.65) 0%, transparent 50%),
+    radial-gradient(ellipse at 72% 70%, rgba(20, 60, 110, 0.55) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 10%, rgba(80, 20, 80,  0.45) 0%, transparent 40%),
+    linear-gradient(175deg, #0e0820 0%, #0a0c1e 35%, #080b18 65%, #06080f 100%);
+}
+
+/* ── Status bar ────────────────────────────────────────────────────────────── */
+
+.ios-statusbar {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.8rem 1.5rem 0;
+  flex-shrink: 0;
+}
+
+.ios-time {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.02em;
+}
+
+.ios-status-icons {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.62rem;
+  color: rgba(255,255,255,0.75);
+}
+
+/* ── Date header ───────────────────────────────────────────────────────────── */
+
+.ios-date-header {
+  position: relative;
+  z-index: 10;
+  text-align: center;
+  padding: 1.25rem 0 0.5rem;
+  flex-shrink: 0;
+}
+
+.ios-date-weekday {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: rgba(255,255,255,0.55);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.ios-date-number {
+  font-size: 3rem;
+  font-weight: 200;
+  color: rgba(255,255,255,0.9);
+  line-height: 1;
+  margin-top: 0.1rem;
+  letter-spacing: -0.04em;
+}
+
+/* ── App grid ──────────────────────────────────────────────────────────────── */
+
+.ios-grid {
+  position: relative;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem 0.5rem;
+  padding: 1.5rem 1.75rem 1rem;
+  flex: 1;
+  align-content: start;
+}
+
+.ios-app-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ios-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.45);
+  transition: transform 0.1s;
+}
+
+.ios-icon-emoji {
+  font-size: 2.1rem;
+  line-height: 1;
+}
+
+/* SVG icon fills the rounded square naturally */
+.ios-icon-img {
+  background: transparent;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.45);
+  overflow: hidden;
+  padding: 0;
+}
+
+.ios-icon-svg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 18px;
+  display: block;
+}
+
+.ios-icon-label {
+  font-size: 0.68rem;
+  color: rgba(255,255,255,0.85);
+  text-align: center;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+  max-width: 72px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Dock ─────────────────────────────────────────────────────────────────── */
+
+.ios-dock-bar {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin: 0 1.25rem 0.5rem;
+  padding: 0.85rem 1.5rem;
+  background: rgba(28, 28, 40, 0.55);
+  backdrop-filter: blur(24px) saturate(1.6);
+  -webkit-backdrop-filter: blur(24px) saturate(1.6);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 24px;
+  flex-shrink: 0;
+}
+
+/* ── Home bar ─────────────────────────────────────────────────────────────── */
+
+.ios-home-bar {
+  width: 130px;
+  height: 5px;
+  background: rgba(255,255,255,0.28);
+  border-radius: 3px;
+  margin: 0.4rem auto 0.75rem;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 10;
+}
+
+/* ── Full-screen app ───────────────────────────────────────────────────────── */
+
+.ios-app-fs {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  background: #000;
+  border-radius: 0;
+  overflow: hidden;
+}
+
+.ios-back-btn {
+  position: absolute;
+  top: 0.85rem;
+  left: 1rem;
+  z-index: 10001;
+  background: rgba(28, 28, 40, 0.82);
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 20px;
+  color: rgba(255,255,255,0.82);
+  font-size: 0.72rem;
+  font-family: -apple-system, sans-serif;
+  padding: 0.32rem 0.8rem;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ── Tablet / desktop ─────────────────────────────────────────────────────── */
+
+@media (min-width: 600px) {
+  .ios-grid {
+    grid-template-columns: repeat(4, 1fr);
+    max-width: 420px;
+    margin: 0 auto;
+  }
+}
